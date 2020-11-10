@@ -25,7 +25,7 @@ If an error is displayed, or if nothing happens, you need to install python. Oth
 To install tree-tagger, follow the instructions at https://cis.uni-muenchen.de/~schmid/tools/TreeTagger/ .
 Install the parameter files for all the languages you would like to use (the default parameters provided with PEP are made to work with tree-tagger-english trained on the Penn-Tree-Bank). **Do not forget to add tree-tagger to your PATH environment variable!**
 
-For _Windows_, see https://docs.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14) .
+For _Windows_, see https://www.computerhope.com/issues/ch000549.htm .
 
 For _Linux/MacOS_, add the line
 
@@ -263,6 +263,10 @@ Example:
 
 NB: the frequency written next to the patterns is the frequency of the sequence ignoring the words in parenthesis.
 
+input: buildPatterns output
+
+output: file specified by the --output FILE option, or standard output.
+
 # Options
 
 ```
@@ -360,6 +364,10 @@ To change the default parameters, use the following command:
 	PEP --update-defaults [options]
 
 with all the options you want to change and their new value. If you want to set nothing as a default value for the stop words or the must-include words, write "None" next to the corresponding parameter.
+
+Example:
+
+	PEP --updade-defaults --tree-tagger tag-english --sw-beg-tag . ? --must-include-tk None
 
 By default, PEP writes the output of each steps of the extraction in C:\User\username\My Documents\PEP on Windows and in ~/Documents/PEP on Linux/MacOS. If you want to change that, you can do so by changing the --DB parameter.
 
