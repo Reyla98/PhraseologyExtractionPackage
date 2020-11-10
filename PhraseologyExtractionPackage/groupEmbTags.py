@@ -17,6 +17,19 @@ from . import removeEmbeddedNgrams
 
 
 class groupEmbTags(luigi.Task):
+    """
+    Group the n-grams according to their simple tag sequence. The process
+    starts with the smallest n-grams. If the simple tag sequence of an n-gram
+    does not match the one from any previous n-gram, a new file is created, and
+    the n-gram is stored in it. If there is a match, the n-gram is sotred in
+    the matching file. The process is repeated for the longer n-grams: an
+    n-gram will be added to all simple tag sequences that match its own; if
+    there is no match, a new file is created.
+    
+    This step makes a first filter, so that not all the n-grams have to be
+    processed at the same time for the next step. It has no other purpose than
+    optimizing the memory usage.
+    """
 
     config = luigi.DictParameter()
 

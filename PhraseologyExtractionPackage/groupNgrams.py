@@ -14,6 +14,11 @@ from . import createNgramBin
 
 
 class groupNgrams(luigi.Task):
+    """
+    Group n-grams of the same size across all the sub-corpora, if several were
+    provided. The frequency of each n-gram is updated to be a list of the
+    number of occurrences in each sub-corpus.
+    """
 
     config = luigi.DictParameter()
     i = luigi.IntParameter()
@@ -36,8 +41,8 @@ class groupNgrams(luigi.Task):
                 self.config['folder_name'],
                 self.config['full_stop'],
                 self.i
-            ))
-        )
+            )
+        ), format=luigi.format.Nop)
 
 
     def run(self):
@@ -76,38 +81,28 @@ class groupNgrams(luigi.Task):
 
         #put the ngrams in a dict with their freq in each subcorpus
         ngram_disp = {}
-        file_cur = 0
-        for file in input_files:
+        for file_cur, file in enumerate(input_files):
             with open(file, "rb") as fin:
-                file_cur += 1
                 next(loadNgrams(fin)) #we skip the 1st line (subcorpus size)
                 for ngram in loadNgrams(fin):
-                    freq = ngram.freq[0]
-                    ngram_disp.setdefault(ngram,
-                                        [0 for i in range(file_cur - 1)])
-                    ngram_disp[ngram].append(freq)
+                    freq_cur = ngram.freq[0]
+                    key = ngram.string
+                    if key not in ngram_disp:
+                        ngram.freq = [0 for i in range(file_cur)]
+                        ngram_disp[key] = ngram
+                    ngram_disp[key].freq.append(freq_cur)
 
             #if some ngrams were not present in the current file,
             #  we add them "0" frequency
-            for ngram, freq in ngram_disp.items():
-                if len(freq) < file_cur:
-                    ngram_disp[ngram].append(0)
-
+            for ngram in ngram_disp.values():
+                if len(ngram.freq) < file_cur + 1:
+                    ngram.freq.append(0)
 
         #now that we have all the frequencies stored in the dict ngram_disp,
-        #  we update them in the Ngram objects, and compute DP
-        for ngram, freq in ngram_disp.items():
-            ngram.freq = freq
-            ngram.DP = ngram.computeDP(subcorpora_prop)
-
-
-        with open(pathlib.Path("{}/groupNgrams/{}{}.ngrams{}".format(
-            self.config['DB'],
-            self.config['folder_name'],
-            self.config['full_stop'],
-            self.i
-            )), "wb") as fout:
-            for ngram in sorted(ngram_disp.keys()):
+        #  we compute DP and store the ngrams into a file
+        with self.output().open("wb") as fout:
+            for ngram in sorted(ngram_disp.values()):
+                ngram.DP = ngram.computeDP(subcorpora_prop)
                 pickle.dump(ngram, fout)
 
 

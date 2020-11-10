@@ -16,6 +16,99 @@ from . import groupEmbTags
 from pprint import pprint
 
 class buildPatterns(luigi.Task):
+    """
+    1. Group n-grams according to their common lemmas (similar to the grouping
+    by simple tag described above).
+
+    2. Add wildcards at the beginning and/or end of each n-gram in the same
+    group so that their common lemmas appear at the same position (e.g. "there
+    is a" and "if there is" would become "* there is a" and "if there is *"
+
+    3. If two n-grams are of the maximal size of n, if they have the same
+    frequency, and if all their tokens are the same (except for the first and
+    last one), it is highly probable that they were extracted from the same
+    sentence(s). For that reason, they are merged together to form an n-gram of
+    size n+1.
+
+    e.g. n = 5:
+
+    - "I saw him last Friday" : frequency: 2
+    - "saw him last Friday evening": frequency: 2
+    - => "I saw him last Friday evening": frequency: 2
+
+    **It can happen that two n-grams are grouped even if they come from two
+    different sentences**, but this is quite rare. On the other hand, this step
+    helps to identify n-grams that are overlapping and were not filtered by
+    removeEmbeddedNgrams because n-grams of size n+1 were not extracted. Thus,
+    it improves a lot the quality of the results, even if there might be a few
+    mistakes.
+
+    4. Build phraseological patterns from the n-grams that were grouped
+    together in steps 1 to 3. By phraseological pattern, I mean a sequence of
+    elements (tokens, lemmas, specific tags, simplified tags or wildcards) that
+    are occurring in the corpus. Each pattern is composed of at least --m
+    lemmas.
+
+    4.1. To build a pattern, the elements of the n-grams are compared one by
+    one. If, in a given position, all the n-grams have the same token, the
+    token will be used in the pattern. If the tokens are different, but the
+    lemma is always the same, the lemma will be used. Same for the specific
+    tags, then simplified tags. If even the simplified tags do not match, a
+    wildcard is used.
+
+    4.2 Once the pattern is made, the n-grams used to build it are separated
+    into several groups based first on the lemma that follows the common
+    lemmas, then on the lemma that preceeds the common lemmas. For each group,
+    a sub-pattern is created.
+    
+    With the following n-grams:
+
+    - that it is
+    - that it was
+    - That it is
+    - that it is the best
+    - that it is a bad
+    - that it is the worst
+    - said that it is a bad
+    - said that it was
+
+    At step 2, the n-grams will be alligned as follow:
+
+    - * that it is * *
+    - * that it was * * 
+    - * That it is * * 
+    - * that it is the best
+    - * that it is a bad
+    - * that it is the worst
+    - said that it is a bad
+    - said that it was * * 
+    - said that it is * * 
+
+    At step 4.1, the following pattern will be built:
+
+    - (said) °that° it °be° (the/a) *
+
+    (See next section for details about the display.)
+
+    At step 4.2, the n-grams will be grouped in this way:
+
+    group 1:
+
+    - * that it is the best
+    - * that is is the worst 
+
+    group 2:
+
+    - * that it is a bad
+    - said that it is a bad
+
+    group 3:
+
+    - said that it was * * 
+    - said that it is * * 
+
+    For each group, a sub-pattern will be created in the same ways as before.
+    """
 
     config = luigi.DictParameter()
 

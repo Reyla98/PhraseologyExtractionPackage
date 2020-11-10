@@ -25,7 +25,7 @@ def updateDefaults(args, old_defaults):
     for elem in ["tk", "lem", "tag"]:
         for pos in ["beg", "mid", "end"]:
             sw = f"sw_{pos}_{elem}"
-            if new_defaults[sw] == "None":
+            if new_defaults[sw] == ["None"]:
                 new_defaults[sw] = []
         if new_defaults[f"must_include_{elem}"] == ["None"]:
             new_defaults[f"must_include_{elem}"] = []
@@ -38,7 +38,11 @@ def main():
     #### Parsing arguments ####
 
     main_parser = argparse.ArgumentParser(
-        description="Extract patterns ..."
+        description="Extract phraseological patterns from a corpus",
+        usage="\n\
+PEP [options] -i input_folder \n\
+PEP [options] -i input_file\n\
+PEP --update-defaults [options]\n"
         )
     
     ### arguments for extraction ###    
@@ -143,8 +147,10 @@ displayed")
         help="Minimum number of variants a pattern must have to be \
 displayed")
     main_parser.add_argument("-R", "--Min-Range",
+        type=int,
         help="Minimum range a pattern must have to be displayed")
     main_parser.add_argument("--Max-Range",
+        type=int,
         help="Maximum range a pattern must have to be displayed")
 
 
@@ -223,9 +229,9 @@ command luigid.",
 
     #### check the validity of some arguments ####
 
-    if config["m"] > config["n"]:
+    if config["m"] >= config["n"]:
         raise ValueError(
-            f'"-m" ({config["m"]}) cannot be smaller than "-n" ({config["n"]}).\n')
+            f'"-m" ({config["m"]}) must be smaller than "-n" ({config["n"]}).\n')
 
     if config['DB'] is None:
         config['DB'] = os.path.expanduser("~/Documents/PEP")

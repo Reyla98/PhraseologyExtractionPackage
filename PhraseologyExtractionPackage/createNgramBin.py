@@ -13,6 +13,11 @@ from lib.Ngram import Ngram
 from . import Xngrams
 
 class createNgramBin(luigi.Task):
+    """
+    Create binary representations of the n-grams (instances of the class
+    Ngram, provided with PEP). This make the n-grams more easily manipulable
+    by the computer.
+    """
 
     file = luigi.Parameter()
     config = luigi.DictParameter()
@@ -57,14 +62,14 @@ class createNgramBin(luigi.Task):
 
 
         # build a dict with correlations b/ specific tags and sple tags
-        with open(self.config['sple_tagset']) as sple_tags_file:
+        with open(self.config['sple_tagset'], encoding="utf-8") as sple_tags_file:
             sple_tagset = json.load(sple_tags_file)
 
 
 
 
         # build instances of Ngrams and dumps them into a file
-        with open(input_file) as fin, \
+        with open(input_file, encoding="utf-8") as fin, \
         open(output_file, "wb") as fout:
 
             line = fin.readline().strip() #1st line contains subcorpus size

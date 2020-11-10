@@ -13,6 +13,24 @@ from lib.Ngram import Ngram
 from . import groupNgrams
 
 class filterNgrams(luigi.Task):
+    """
+    Check all the stop words and must-include words lists and filter the
+    n-grams accordingly. If the option -r is set, the stop words and
+    must-include words are parsed as regular expressions. Otherwise, they are
+    considered as simple strings.
+    
+    9 stop words lists can be set: three for words occurring at the first
+    position of the n-gram ("beg"), three for words occurring at the last
+    position ("end"), three for words occurring at any place in the n-grams;
+    each time one for specifying respectively tokens, lemmas or tags.
+    
+    3 must-include words lists can be set: one for specifying tokens, one for
+    lemmas, and one for tags. 
+    
+    For an n-gram to be kept, it must contain none of the stop words and all
+    the must-include words.
+
+    """
 
     config = luigi.DictParameter()
     i = luigi.IntParameter()
@@ -34,7 +52,7 @@ class filterNgrams(luigi.Task):
                 self.config['iw'],
                 self.i
                 )
-        ))
+        ), format=luigi.format.Nop)
 
 
     def run(self):
@@ -52,15 +70,6 @@ class filterNgrams(luigi.Task):
             self.i
             ))
 
-        output_file = pathlib.Path("{}/filterNgrams/{}{}sw{}iw{}/{}".format(
-            self.config['DB'],
-            self.config['folder_name'],
-            self.config['full_stop'],
-            self.config['sw'],
-            self.config['iw'],
-            self.i
-            ))
-
         #make the output folder if does not already exist
         try:
             os.mkdir("{}/filterNgrams/{}{}sw{}iw{}".format(
@@ -74,7 +83,7 @@ class filterNgrams(luigi.Task):
         except FileExistsError:
             pass
 
-        with open(input_file, "rb") as fin, open(output_file, "wb") as fout:
+        with open(input_file, "rb") as fin, self.output().open("wb") as fout:
             for ngram in loadNgrams(fin):
                 if checkMustInclude(ngram, self.config) \
                 and checkStopWordsNgram(ngram, self.config):
@@ -125,7 +134,7 @@ def checkMustInclude(ngram, config):
                 matches = [re.fullmatch(regex, elem) for elem in getattr(ngram, ngram_attr)]
                 if not any (match is not None for match in matches):
                     return False
-        if not all(word in getattr(ngram, ngram_attr) for word in config[iw]):
+        elif not all(word in getattr(ngram, ngram_attr) for word in config[iw]):
             return False
 
     return True

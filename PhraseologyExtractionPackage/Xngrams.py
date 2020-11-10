@@ -17,6 +17,17 @@ from tempfile import gettempdir
 from . import tagger
 
 class Xngrams(luigi.Task):
+    """
+    Extract n-grams (sequences of n words) in each sub-corpus, for each size of
+    n specified, i.e. all integers between the -m and -n parameters included.
+    If the --full_stop [TAG] parameter is specified, no n-gram overlapping two
+    sentences will be extracted. [TAG] must be the tag used by tree-tagger for
+    end of sentences.
+    
+    It is highly recommended to use this option if the corpus is large, since 
+    it will reduce the number of n-gram extracted from the beginning of the
+    pipeline.
+    """
 
     file = luigi.Parameter()
     config = luigi.DictParameter()
@@ -37,7 +48,8 @@ class Xngrams(luigi.Task):
             corpus_name,
             self.config['full_stop'],
             self.i
-            )))
+            )
+        ), format=luigi.format.UTF8)
 
 
     def run(self):

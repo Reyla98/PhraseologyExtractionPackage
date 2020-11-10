@@ -54,13 +54,13 @@ class Tagger(luigi.Task):
         except FileExistsError:
             pass
 
-        with open(tmp_file, "w") as TTfile:
+        with open(tmp_file, "w", encoding="utf-8") as TTfile:
             tree_tagger = subprocess.run(
                 f"{self.config['tree_tagger']} {self.file}",
                 stdout = TTfile,
                 stderr = subprocess.DEVNULL,
                 shell=True)
-        with open (tmp_file, "r") as TTfile:
+        with open (tmp_file, "r", encoding="utf-8") as TTfile:
             for TTline in TTfile.readlines():
                 TTline = TTline.strip()
                 match = re.fullmatch(f".+\t(.+)\t.+", TTline)

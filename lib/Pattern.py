@@ -310,11 +310,6 @@ class Pattern:
     def __eq__(self, other):
         if isinstance(other, Ngram):
             return all( (t == "tk" or e2 == "*" ) for e2, t in zip(other.tokens, self.types))
-
-            #if all( ( t == "tk"  or ( isinstance(e1, list) and e2 == "*" ) ) for e1, e2, t in zip(self.elems, other.tokens, self.types)):
-            #    return True
-            #else:
-            #    return False
         else:
             return all( ( e1 == e2 or isinstance(e1, list) ) for e1, e2 in zip(self.elems, other.elems))
 
@@ -440,13 +435,6 @@ class Pattern:
         and self.range() < config['Min_Range'] ) \
         or ( config['Max_Range'] is not None
         and self.range() > config['Max_Range'] ):
-            for var_cur in self.var:
-                if isinstance(var_cur, Ngram):
-                    if self == var_cur:
-                        continue
-                    file.write(str(rank) + "  " + "\t" * indent, var_cur.longStr())
-                else:
-                    rank = var_cur.printAllVar(config, rank, file, indent)
             return rank
 
 

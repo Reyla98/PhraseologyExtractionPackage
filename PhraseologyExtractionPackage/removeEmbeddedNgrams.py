@@ -12,6 +12,12 @@ import pathlib
 from . import filterNgrams
 
 class removeEmbeddedNGrams(luigi.Task):
+    """
+    Remove those that are embedded in longer n-grams. An n-gram is embedded in
+    a longer one if the longer one has all the tokens of the smaller one,
+    appearing in the same order, and if they have exactly the same frequency in
+    all sub-corpora.
+    """
 
     config = luigi.DictParameter()
 
