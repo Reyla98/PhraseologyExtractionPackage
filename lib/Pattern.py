@@ -10,13 +10,13 @@ from lib.Ngram import Ngram
 
 from pprint import pprint
 
-            
+
 class Pattern:
 
     def __init__(self, ngram_list, m, subcorpora_prop, child=False):
         #### set the attributes ####
         self.var = None     #list of Ngrams
-        self.nbr_var = None 
+        self.nbr_var = None
         self.elems = None
         self.types = None
         self.freq = None    #list of int
@@ -82,7 +82,7 @@ class Pattern:
 
         elems_backup = elems.copy()
         types_backup = types.copy()
-    
+
         for ngram_cur in ngram_list[1:]:
 
             not_aligned = True
@@ -172,14 +172,14 @@ class Pattern:
 
                     types_backup = types.copy()
                     elems_backup = elems.copy()
-                    
+
             if not not_aligned:
                 var.append(ngram_cur)
                 types_backup = types.copy()
                 elems_backup = elems.copy()
 
 
-        #### removing extra slots ####  
+        #### removing extra slots ####
         start = 0
         for t in types:
             if t is None:
@@ -201,7 +201,7 @@ class Pattern:
 
         if end != 0:
             elems = list(islice(elems, start, len(types)-end))
-            types = types[start:-end] 
+            types = types[start:-end]
         else:
             types = types[start:]
             elems = list(islice(elems, start, None))
@@ -234,7 +234,7 @@ class Pattern:
                 counted_ngrams.add(var_cur_tokens)
 
 
-        #### initiate the pattern ####         
+        #### initiate the pattern ####
         self.freq = freq
         self.elems = elems
         self.types = types
@@ -333,7 +333,7 @@ class Pattern:
         #### no dispersion, only one subcorpus ####
         if len(subcorpora_prop) == 1:
             return 1
-        
+
         #### determine the proportion of occurrences in each subcorpus ####
         total_occurrences = self.totFreq()
         occurrences_prop = []
@@ -389,7 +389,7 @@ class Pattern:
                     first_elem_index == i
                 last_elem_index = i
 
-        nbr_non_fixed_elems = 0    
+        nbr_non_fixed_elems = 0
         for e in range(first_elem_index, last_elem_index + 1):
             if e == "*" or isinstance(e, list):
                 nbr_non_fixed_elems += 1
@@ -422,8 +422,10 @@ class Pattern:
 
         if config['Sort'] == "frequency":
             sorted_variants = sorted(self.var, key=Pattern.totFreq, reverse=True)
+            sorted_patterns = sorted(self.subPat, key=Pattern.totFreq, reverse=True)
         elif config['Sort'] == "dispersion":
             sorted_variants = sorted(self.var, key=Pattern.getDP)
+            sorted_patterns = sorted(self.subPat, key=Pattern.getDP)
 
 
         # check all conditions for parent pattern not to be printed
@@ -446,14 +448,14 @@ class Pattern:
             file.write(str(rank) + "  " + self.longStr())
         indent += 1
 
-        
+
         # we also print all its children according to the user parameters
         for var_cur in sorted_variants:
             if self == var_cur:
                 continue
             if var_cur.totFreq() >= config['Min_Freq_Examples']:
                 file.write("\t" * indent + var_cur.longStr())
-        for subPat_cur in self.subPat:
+        for subPat_cur in sorted_patterns:
             if subPat_cur.totFreq() >= config['Min_Freq_Examples']:
                 subPat_cur.printAllVar(config, rank, file, indent, child=True)
         file.write("\n")
@@ -462,4 +464,3 @@ class Pattern:
 
     def __hash__(self):
         return hash(self.longStr())
-        
