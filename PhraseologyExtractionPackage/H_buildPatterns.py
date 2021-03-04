@@ -239,7 +239,7 @@ class buildPatterns(luigi.Task):
             patterns = []
 
             for ngram_list in lemmas_gram.values():
-                pattern = Pattern(ngram_list, self.config['m'], subcorpora_prop)
+                pattern = Pattern(ngram_list, self.config['m'], subcorpora_prop, deepness=0)
                 patterns.append(pattern)
 
             return patterns

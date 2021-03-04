@@ -13,7 +13,7 @@ from pprint import pprint
 
 class Pattern:
 
-    def __init__(self, ngram_list, m, subcorpora_prop, child=False):
+    def __init__(self, ngram_list, m, subcorpora_prop, deepness, child=False):
         #### set the attributes ####
         self.var = None     #list of Ngrams
         self.nbr_var = None
@@ -23,6 +23,7 @@ class Pattern:
         self.node = None    #index of 1st & last common tokens
         self.DP = None
         self.subPat = None  #list of Patterns
+        self.deepness = None #number of parent patterns
 
 
         #### define some useful functions ####
@@ -67,6 +68,7 @@ class Pattern:
             self.node = [0, None]
             self.DP = self.computeDP(subcorpora_prop)
             self.subPat = []
+            self.deepness = deepness
             return
 
         ngram_ref = ngram_list[0]
@@ -246,14 +248,14 @@ class Pattern:
 
 
         #### group variants based on ending ####
-        try:
-            after_node = self.node[1]
-        except :
-            print(self.elems)
-            for ngram in self.var:
-                print(ngram)
-            print()
-            return
+        #try:
+        after_node = self.node[1]
+        #except :
+        #    print(self.elems)
+        #    for ngram in self.var:
+        #        print(ngram)
+        #    print()
+        #    return
         try:
             if after_node is not None: #there is sth after node
                 lem_vars = {}
@@ -271,7 +273,11 @@ class Pattern:
                     if len(ngram_list) == 1:
                         self.var.append(ngram_list[0])
                     else:
-                        self.subPat.append(Pattern(ngram_list, m, subcorpora_prop, child=True))
+                        self.subPat.append(Pattern(ngram_list,
+                                                   m,
+                                                   subcorpora_prop,
+                                                   deepness=deepness+1,
+                                                   child=True))
 
                 for var_cur in other:
                    self.var.append(var_cur)
@@ -302,7 +308,11 @@ class Pattern:
             if len(ngram_list) == 1:
                 self.var.extend(ngram_list)
             else:
-                self.subPat.append(Pattern(ngram_list, m, subcorpora_prop, child=True))
+                self.subPat.append(Pattern(ngram_list,
+                                           m,
+                                           subcorpora_prop,
+                                           deepness=deepness+1,
+                                           child=True))
 
         self.var.extend(other)
 
