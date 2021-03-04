@@ -189,7 +189,7 @@ command luigid.",
             args['corpus_name'].append(str(os.path.splitext(
                 os.path.basename(args['corpora']))[0]))
             args['corpora'] = [corpora_path]
-            args['folder_name'] = args['corpus_name']
+            args['folder_name'] = args['corpus_name'][0]
         elif os.path.isdir(corpora_path):
             args['folder_name'] = os.path.basename(corpora_path)
             args['corpora'] = [os.path.join(corpora_path, file) for file in os.listdir(args['corpora'])]
