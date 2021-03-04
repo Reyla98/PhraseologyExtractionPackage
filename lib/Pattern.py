@@ -115,7 +115,7 @@ class Pattern:
                                 or types[i] is None:
                                     types[i] = "tag"
                                     elems[i] = tags_cur[i]
-                            elif sple_tags_cur == sple_tags_ref:
+                            elif sple_tags_cur[i] == sple_tags_ref[i]:
                                 if types[i] == "tk" \
                                 or types[i] == "lem" \
                                 or types[i] == "tag"\
@@ -134,7 +134,7 @@ class Pattern:
                                     elems = elems_backup.copy()
                                     types = types_backup.copy()
                                     not_aligned = True
-                                    error += 1
+                                    error += 1 #################
                                     break
                         else:
                             if tokens_cur[i] != "*" and types[i] is None:
@@ -224,8 +224,6 @@ class Pattern:
 
 
         #### compute freq
-        import pudb
-        pudb.set_trace()
         freq = [0 for i in range(len(var[0].freq))]
         var.sort(key=len)
         counted_ngrams = set()
@@ -267,7 +265,7 @@ class Pattern:
             elem = "sple_tags"
 
         try:
-            if after_node is not None: #there is sth after node
+            if after_node is not None: #there is sth after the node
                 elem_vars = {}
                 other = []
                 for var_cur in self.var:
