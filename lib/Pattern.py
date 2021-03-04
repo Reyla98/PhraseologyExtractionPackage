@@ -247,7 +247,10 @@ class Pattern:
         self.DP = self.computeDP(subcorpora_prop)
 
 
-        #### group variants based on ending ####
+        #### group variants based on what follows the node ####
+        # group variants per tag if odd deepness
+        # group variants per lemma if even deepness
+
         #try:
         after_node = self.node[1]
         #except :
@@ -256,20 +259,26 @@ class Pattern:
         #        print(ngram)
         #    print()
         #    return
+
+        if deepness%2 == 0:
+            elem = "lemmas"
+        else:
+            elem = "sple_tags"
+
         try:
             if after_node is not None: #there is sth after node
-                lem_vars = {}
+                elem_vars = {}
                 other = []
                 for var_cur in self.var:
-                    lem_var_cur = var_cur.lemmas[after_node]
-                    if lem_var_cur != "*":
-                        lem_vars.setdefault(lem_var_cur, [])
-                        lem_vars[lem_var_cur].append(var_cur)
+                    elem_var_cur = getattr(var_cur, elem)[after_node]
+                    if elem_var_cur != "*":
+                        elem_vars.setdefault(elem_var_cur, [])
+                        elem_vars[elem_var_cur].append(var_cur)
                     else:
                         other.append(var_cur)
 
                 self.var = []
-                for ngram_list in lem_vars.values():
+                for ngram_list in elem_vars.values():
                     if len(ngram_list) == 1:
                         self.var.append(ngram_list[0])
                     else:
@@ -285,26 +294,26 @@ class Pattern:
         except IndexError: #nothing after node
             pass
 
-        #### group variants based on beginning ####
+        #### group variants based on what precedes the node ####
         before_node = self.node[0] -1
         if before_node < 0: #nothing before node
             return
 
-        lem_vars = {}
+        elem_vars = {}
         other = []
         for var_cur in self.var:
             if isinstance(var_cur, Pattern):
                 other.append(var_cur)
             else:
-                lem_var_cur = var_cur.lemmas[before_node]
-                if lem_var_cur != "*":
-                    lem_vars.setdefault(lem_var_cur, [])
-                    lem_vars[lem_var_cur].append(var_cur)
+                elem_var_cur = getattr(var_cur, elem)[before_node]
+                if elem_var_cur != "*":
+                    elem_vars.setdefault(elem_var_cur, [])
+                    elem_vars[elem_var_cur].append(var_cur)
                 else:
                     other.append(var_cur)
 
         self.var = []
-        for ngram_list in lem_vars.values():
+        for ngram_list in elem_vars.values():
             if len(ngram_list) == 1:
                 self.var.extend(ngram_list)
             else:
