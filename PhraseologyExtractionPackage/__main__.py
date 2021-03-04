@@ -44,8 +44,8 @@ PEP [options] -i input_folder \n\
 PEP [options] -i input_file\n\
 PEP --update-defaults [options]\n"
         )
-    
-    ### arguments for extraction ###    
+
+    ### arguments for extraction ###
     main_parser.add_argument("-i", "--input",
         help="Folder or file to be processed. Note that the files should \
 be encoded in utf8 and that there should be no space in the file path!",
@@ -158,7 +158,7 @@ displayed")
     main_parser.add_argument("-u", "--update-defaults",
         help="Sets the specified argument values as default",
         action='store_true')
-    
+
 
     ### global scheduler (does not work on Windows)
     main_parser.add_argument("-g", "--global-scheduler",
@@ -217,7 +217,7 @@ command luigid.",
         with open(sys.prefix + str(pathlib.Path(
             '/config/PhraseologyExtractionPackage/default.json'))) \
         as config_file:
-            default = json.load(config_file)        
+            default = json.load(config_file)
 
     args['root_path'] = str(args['root_path'])
     if not args['update_defaults']:
@@ -283,7 +283,7 @@ overwrite it? (y/n) ")
                                         pathlib.Path(config['sple_tagset'])))
     except :
         raise ValueError(f"{config['sple_tagset']} is not a valid json format.")
-            
+
 
     #### add iw and sw (useful for file names) ####
     config['sw'] = []
@@ -292,14 +292,21 @@ overwrite it? (y/n) ")
             sw_cur = config[f'sw_{pos}_{elem}']
             config['sw'].extend(sw_cur)
     config['sw'] = "_".join(config['sw'])
-    config['sw'] = re.sub('[/\\:\*\?"<>\|]', "_", config['sw'])
-    
+
+    if sys.platform != "win32" and sys.platform != "cygwin":
+        config['sw'] = re.sub('/', "_", config['sw'])
+    else:
+        config['sw'] = re.sub('[/\\:\*\?"<>\|]', "_", config['sw'])
+
     config['iw'] = []
     for elem in ["lem", "tag", "tk"]:
         iw_cur = config[f'must_include_{elem}']
         config['iw'].extend(iw_cur)
     config['iw'] = "_".join(config['iw'])
-    config['iw'] = re.sub('[/\\:\*\?"<>\|]', "_", config['iw'])
+    if sys.platform != "win32" and sys.platform != "cygwin":
+        config['sw'] = re.sub('/', "_", config['sw'])
+    else:
+        config['sw'] = re.sub('[/\\:\*\?"<>\|]', "_", config['iw'])
 
     #### make the output directories if do not already exist ####
 
