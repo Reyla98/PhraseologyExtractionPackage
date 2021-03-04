@@ -93,10 +93,12 @@ class displayPatterns(luigi.Task):
         else:
             fout = open(self.config['output'], "w")
 
+        import pudb; pudb.set_trace()###############
         for file in all_files:
             with open(str(pathlib.Path(input_folder)) +
                       str(pathlib.Path(f"/{file}")), "rb") as fin:
                 pattern = pickle.load(fin)
+                pudb.set_trace()###########
                 rank = pattern.printAllVar(self.config, rank, fout)
 
         if "output" not in self.config:

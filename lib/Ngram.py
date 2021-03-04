@@ -1,6 +1,6 @@
 ######################################################################
 # This file is part of the PhraseologyExtractionPackage.             #
-# copywrithe (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2020  #
+# copywrithe (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021  #
 ######################################################################
 
 import re
@@ -116,6 +116,18 @@ class Ngram:
             )
 
 
+    def fullStr(self):
+        words = zip(self.tokens, self.lemmas, self.tags)
+        full_str = "|"
+        for word in words:
+            if word[0] == "*":
+                continue
+            full_str += "".join(word)
+            full_str += "|"
+            
+        return full_str
+
+
     def __len__(self):
         return len(self.tokens)
 
@@ -132,7 +144,7 @@ class Ngram:
 
 
     def __hash__(self):
-        return hash(f"{self.tokens} {self.lemmas} {self.tags}")
+        return hash(self.fullStr())
 
 
     def __contains__(self, other):

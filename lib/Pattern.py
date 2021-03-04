@@ -1,6 +1,6 @@
 ######################################################################
 # This file is part of the PhraseologyExtractionPackage.             #
-# copywrithe (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2020  #
+# copywrithe (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021  #
 ######################################################################
 
 import sys
@@ -224,16 +224,17 @@ class Pattern:
 
 
         #### compute freq
+        import pudb
+        pudb.set_trace()
         freq = [0 for i in range(len(var[0].freq))]
         var.sort(key=len)
         counted_ngrams = set()
 
         for var_cur in var:
-            var_cur_tokens = " ".join(var_cur.tokens).strip(" *")
             #loop over all ngrams already counted. If none match, frequency is added
-            if all(ngram not in var_cur_tokens for ngram in counted_ngrams):
+            if all(ngram not in var_cur.fullStr() for ngram in counted_ngrams):
                 freq = [i + j for i, j in zip(freq, var_cur.freq)]
-                counted_ngrams.add(var_cur_tokens)
+                counted_ngrams.add(var_cur.fullStr())
 
 
         #### initiate the pattern ####
