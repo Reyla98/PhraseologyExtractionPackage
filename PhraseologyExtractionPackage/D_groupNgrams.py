@@ -86,11 +86,10 @@ class groupNgrams(luigi.Task):
                 next(loadNgrams(fin)) #we skip the 1st line (subcorpus size)
                 for ngram in loadNgrams(fin):
                     freq_cur = ngram.freq[0]
-                    key = ngram.string
-                    if key not in ngram_disp:
+                    if ngram not in ngram_disp:
                         ngram.freq = [0 for i in range(file_cur)]
-                        ngram_disp[key] = ngram
-                    ngram_disp[key].freq.append(freq_cur)
+                        ngram_disp[ngram] = ngram
+                    ngram_disp[ngram].freq.append(freq_cur)
 
             #if some ngrams were not present in the current file,
             #  we add them "0" frequency

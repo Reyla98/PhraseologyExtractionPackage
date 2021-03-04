@@ -45,7 +45,7 @@ class Ngram:
         #### no dispersion, only one subcorpus ####
         if len(subcorpora_prop) == 1:
             return 1
-        
+
         #### determine the proportion of occurrences in each subcorpus ####
         total_occurrences = self.totFreq()
         occurrences_prop = []
@@ -132,7 +132,7 @@ class Ngram:
 
 
     def __hash__(self):
-        return hash(self.string)
+        return hash(f"{self.tokens} {self.lemmas} {self.tags}")
 
 
     def __contains__(self, other):
@@ -151,4 +151,3 @@ class Ngram:
 
     def __ge__(self, other):
         return self.string >= other.string
-
