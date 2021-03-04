@@ -481,4 +481,4 @@ class Pattern:
 
 
     def __hash__(self):
-        return hash(self.longStr())
+        return hash(self.fullStr())

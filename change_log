@@ -1,2 +1,10 @@
+#
+Remove wildcards (except for "/") in filenames on Unix systems
+
+Bug fixes:
+    - Frequency display
+    - Simplified_tags display
+    - Other minor fixes
+
 # v 0.1.1
 bug fix
