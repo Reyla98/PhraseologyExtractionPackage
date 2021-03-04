@@ -11,7 +11,7 @@ import luigi
 import pathlib
 
 from lib.Pattern import Pattern
-from . import buildPatterns
+from . import H_buildPatterns as buildPatterns
 
 from pprint import pprint
 
@@ -21,10 +21,10 @@ class displayPatterns(luigi.Task):
     like structure. On the left of each pattern is printed its rank. On its
     right is first written its frequency, then its dispersion (Gries' DP) and,
     between square brackets, the frequency in each sub-corpus.
-    
+
     Under a pattern, with an indentation, are written all the sub-patterns or
     the n-grams that constitute the pattern.
-    
+
     The elements written between ° are lemmas, as defined by tree-tagger.
     Wildcards are not printed if they are at the beginning or the end of the
     pattern/n-gram. Words written in parenthesis are lemmas that occur at least
@@ -37,11 +37,11 @@ class displayPatterns(luigi.Task):
         1  (say) that it °be° (the/a) (bad) 8   0.06944444444444442 [5, 3]
             that it is  6   0.23444444444444444 [4, 2]
             that it was 2   0.05555555555555558 [1, 1]
-        
+
             that it is the  AJ 2    0.05555555555555558 [1, 1]
                 that it is the worst    1   0.4444444444444444  [1, 0]
                 that it is the best 1   0.5555555555555556  [0, 1]
-        
+
             said that it °be°   5   0.4444444444444444  [5, 0]
                 said that it was    1   0.5555555555555556  [1, 0]
                 said that it is 4   0.6788888888888889  [4, 0]
@@ -77,7 +77,7 @@ class displayPatterns(luigi.Task):
                     self.config['n'],
                     )
                 )
-        
+
         all_files = os.listdir(input_folder)
         if self.config['Sort'] == "frequency":
             all_files.sort(
@@ -101,7 +101,7 @@ class displayPatterns(luigi.Task):
 
         if "output" not in self.config:
             fout.close()
-        
+
 
 
 def main(config):
@@ -109,4 +109,3 @@ def main(config):
         luigi.build([displayPatterns(config=config)])
     else:
         luigi.build([displayPatterns(config=config)], local_scheduler=True)
-

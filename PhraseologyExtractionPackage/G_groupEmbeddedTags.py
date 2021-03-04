@@ -13,10 +13,10 @@ import pathlib
 from tempfile import gettempdir
 from lib.Ngram import Ngram
 from lib.Pattern import Pattern
-from . import removeEmbeddedNgrams
+from . import F_removeEmbeddedNgrams as removeEmbeddedNgrams
 
 
-class groupEmbTags(luigi.Task):
+class groupEmbeddedTags(luigi.Task):
     """
     Group the n-grams according to their simple tag sequence. The process
     starts with the smallest n-grams. If the simple tag sequence of an n-gram
@@ -25,7 +25,7 @@ class groupEmbTags(luigi.Task):
     the matching file. The process is repeated for the longer n-grams: an
     n-gram will be added to all simple tag sequences that match its own; if
     there is no match, a new file is created.
-    
+
     This step makes a first filter, so that not all the n-grams have to be
     processed at the same time for the next step. It has no other purpose than
     optimizing the memory usage.
@@ -86,7 +86,7 @@ class groupEmbTags(luigi.Task):
                 self.config['n'],
                 )
             )
-        
+
         try:
             os.mkdir(output_folder)
         except FileExistsError:

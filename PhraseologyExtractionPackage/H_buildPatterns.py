@@ -11,7 +11,7 @@ import luigi
 import pathlib
 
 from lib.Pattern import Pattern
-from . import groupEmbTags
+from . import G_groupEmbeddedTags as groupEmbeddedTags
 
 from pprint import pprint
 
@@ -60,7 +60,7 @@ class buildPatterns(luigi.Task):
     into several groups based first on the lemma that follows the common
     lemmas, then on the lemma that preceeds the common lemmas. For each group,
     a sub-pattern is created.
-    
+
     With the following n-grams:
 
     - that it is
@@ -75,14 +75,14 @@ class buildPatterns(luigi.Task):
     At step 2, the n-grams will be alligned as follow:
 
     - * that it is * *
-    - * that it was * * 
-    - * That it is * * 
+    - * that it was * *
+    - * That it is * *
     - * that it is the best
     - * that it is a bad
     - * that it is the worst
     - said that it is a bad
-    - said that it was * * 
-    - said that it is * * 
+    - said that it was * *
+    - said that it is * *
 
     At step 4.1, the following pattern will be built:
 
@@ -95,7 +95,7 @@ class buildPatterns(luigi.Task):
     group 1:
 
     - * that it is the best
-    - * that is is the worst 
+    - * that is is the worst
 
     group 2:
 
@@ -104,8 +104,8 @@ class buildPatterns(luigi.Task):
 
     group 3:
 
-    - said that it was * * 
-    - said that it is * * 
+    - said that it was * *
+    - said that it is * *
 
     For each group, a sub-pattern will be created in the same ways as before.
     """
@@ -113,7 +113,7 @@ class buildPatterns(luigi.Task):
     config = luigi.DictParameter()
 
     def requires(self):
-        return groupEmbTags.groupEmbTags(config=self.config)
+        return groupEmbeddedTags.groupEmbeddedTags(config=self.config)
 
     def output(self):
         return luigi.LocalTarget(pathlib.Path(
@@ -131,7 +131,7 @@ class buildPatterns(luigi.Task):
 
 
     def run(self):
-     
+
         def groupIdentical(lemmas_gram):
             def groupNgrams(ngram1, ngram2):
                 """
@@ -269,7 +269,7 @@ class buildPatterns(luigi.Task):
                     self.config['n'],
                     )
                 )
-                
+
             os.mkdir(output_folder)
 
             already_a_pattern = set() #keeps track of all created patterns to
@@ -292,7 +292,7 @@ class buildPatterns(luigi.Task):
                             break
 
                 lemmas_gram = sortNgramsPerLemma(ngram_list)
-                alignNgrams(lemmas_gram)         
+                alignNgrams(lemmas_gram)
                 groupIdentical(lemmas_gram)
                 patterns = lemmaGrams2Pattern(lemmas_gram, subcorpora_prop)
 

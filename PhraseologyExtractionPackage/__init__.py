@@ -1,11 +1,12 @@
-from . import tagger
-from . import Xngrams
-from . import groupNgrams
-from . import removeEmbeddedNgrams
-from . import createNgramBin
-from . import groupEmbTags
-from . import buildPatterns
-from . import displayPatterns
+from . import A_tagger
+from . import B_Xngrams
+from . import C_createNgramBin
+from . import D_groupNgrams
+from . import E_filterNgrams
+from . import F_removeEmbeddedNgrams
+from . import G_groupEmbeddedTags
+from . import H_buildPatterns
+from . import I_displayPatterns
 
 import pathlib
 import os

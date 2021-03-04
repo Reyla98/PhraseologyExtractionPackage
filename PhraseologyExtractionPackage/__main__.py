@@ -328,7 +328,7 @@ overwrite it? (y/n) ")
 
     #### launch luigi pipeline ####
 
-    PEP.displayPatterns.main(config)
+    PEP.I_displayPatterns.main(config)
 
 
 if __name__ == "__main__":

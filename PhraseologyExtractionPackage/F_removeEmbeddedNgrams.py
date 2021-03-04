@@ -9,7 +9,7 @@ import luigi
 import itertools
 import pathlib
 
-from . import filterNgrams
+from . import E_filterNgrams as filterNgrams
 
 class removeEmbeddedNGrams(luigi.Task):
     """
@@ -203,13 +203,13 @@ class removeEmbeddedNGrams(luigi.Task):
                     for ngram in small_ngram_list_filtered:
                         pickle.dump(ngram, fout)
 
-            with open(str(output_folder) + 
+            with open(str(output_folder) +
                       str(pathlib.Path(f"/{self.config['n']}")), "wb") \
             as fout:
                 for ngram in long_ngram_list:
                     pickle.dump(ngram, fout)
 
-        main()    
+        main()
 
 
 def main(config):

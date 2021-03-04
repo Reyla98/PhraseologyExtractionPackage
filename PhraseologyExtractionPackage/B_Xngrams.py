@@ -14,7 +14,7 @@ import pickle
 
 from collections import ChainMap
 from tempfile import gettempdir
-from . import tagger
+from . import A_tagger as tagger
 
 class Xngrams(luigi.Task):
     """
@@ -23,8 +23,8 @@ class Xngrams(luigi.Task):
     If the --full_stop [TAG] parameter is specified, no n-gram overlapping two
     sentences will be extracted. [TAG] must be the tag used by tree-tagger for
     end of sentences.
-    
-    It is highly recommended to use this option if the corpus is large, since 
+
+    It is highly recommended to use this option if the corpus is large, since
     it will reduce the number of n-gram extracted from the beginning of the
     pipeline.
     """
@@ -79,7 +79,7 @@ class Xngrams(luigi.Task):
                 fout.writelines(f"{ngram}\t{freq}\n")
 
 
-def main(config):    
+def main(config):
     for file in config['corpora']:
         for i in range(config['m'], config['n']+1):
             luigi.build([Xngrams(file=file,

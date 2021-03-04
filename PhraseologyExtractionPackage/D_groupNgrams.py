@@ -10,7 +10,7 @@ import pickle
 import luigi
 import pathlib
 
-from . import createNgramBin
+from . import C_createNgramBin as createNgramBin
 
 
 class groupNgrams(luigi.Task):
@@ -68,7 +68,7 @@ class groupNgrams(luigi.Task):
         for file in input_files:
             with open(file, "rb") as fin:
                 subcorpora_size.append(pickle.load(fin))
-        
+
         total_size = sum(subcorpora_size)
         subcorpora_prop = [size / total_size for size in subcorpora_size]
 

@@ -10,7 +10,7 @@ import re
 import pathlib
 
 from lib.Ngram import Ngram
-from . import groupNgrams
+from . import D_groupNgrams as groupNgrams
 
 class filterNgrams(luigi.Task):
     """
@@ -18,15 +18,15 @@ class filterNgrams(luigi.Task):
     n-grams accordingly. If the option -r is set, the stop words and
     must-include words are parsed as regular expressions. Otherwise, they are
     considered as simple strings.
-    
+
     9 stop words lists can be set: three for words occurring at the first
     position of the n-gram ("beg"), three for words occurring at the last
     position ("end"), three for words occurring at any place in the n-grams;
     each time one for specifying respectively tokens, lemmas or tags.
-    
+
     3 must-include words lists can be set: one for specifying tokens, one for
-    lemmas, and one for tags. 
-    
+    lemmas, and one for tags.
+
     For an n-gram to be kept, it must contain none of the stop words and all
     the must-include words.
 
@@ -88,7 +88,7 @@ class filterNgrams(luigi.Task):
                 if checkMustInclude(ngram, self.config) \
                 and checkStopWordsNgram(ngram, self.config):
                     pickle.dump(ngram, fout)
-       
+
 
 def checkStopWordsNgram(ngram, config):
     for elem, ngram_attr in zip(["tk", "lem", "tag"],

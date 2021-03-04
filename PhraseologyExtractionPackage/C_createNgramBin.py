@@ -10,7 +10,7 @@ import luigi
 import pathlib
 
 from lib.Ngram import Ngram
-from . import Xngrams
+from . import B_Xngrams as Xngrams
 
 class createNgramBin(luigi.Task):
     """
