@@ -1,6 +1,6 @@
 ######################################################################
 # This file is part of the PhraseologyExtractionPackage.             #
-# Copyright (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021  #
+# Copyright (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021   #
 ######################################################################
 
 import argparse
@@ -244,7 +244,7 @@ command luigid.",
         overwrite = input(f"The file {config['output']} already exist. Do you want to \
 overwrite it? (y/n) ")
         if re.match("[yY]", overwrite) is None:
-            sys.stderr.write("Aborting")
+            sys.stderr.write("Aborting\n")
             sys.exit()
 
     if config['regex']:
@@ -287,6 +287,70 @@ overwrite it? (y/n) ")
                                         pathlib.Path(config['sple_tagset'])))
     except :
         raise ValueError(f"{config['sple_tagset']} is not a valid json format.")
+
+
+    #### Print arguments and ask for confirmation to continue ####
+    info_list = ["The following arguments are going to be used:",
+                f"- n (maximum size of the patterns): {config['n']}",
+                f"- m (minimum size of the patterns): {config['m']}",
+                f"- language (used by tree-tagger): {config['tree_tagger']}"]
+    if config['Min_Freq_Patterns'] != 1:
+        info_list.append(f"- F (minimum frequency of the patterns): {config['Min_Freq_Patterns']}")
+    if config['Proportion_Freq_Examples'] != 0:
+        info_list.append(f"- P (proportion of the frequency for subpatterns): {config['Proportion_Freq_Examples']}")
+    if config['Min_Freq_Examples'] != 1:
+        info_list.append(f"- E (minimum frequency of the supbatterns): {config['Min_Freq_Examples']}")
+    if config['Min_Range'] != 1:
+        info_list.append(f"- R (minimum range): {config['Min_Range']}")
+    if config['Max_Range'] is not None:
+        info_list.append(f"- Maximum range: {config['Max_Range']}")
+    if config['Min_Nbr_Variants'] is not None:
+        info_list.append(f"- minimum number of variants: {config['Min_Nbr_Variants']}")
+    if config['Max_Nbr_Variants'] is not None:
+        info_list.append(f"- maximum number of variants: {config['Max_Nbr_Variants']}")
+    info_list.append(f"- Sort: {config['Sort']}")
+    info_list.append(f"- S (full stop tag): {config['full_stop']}")
+    if config['sw_mid_tk'] != []:
+        info_list.append(f"- stop words (tokens): {' '.join(config[f'sw_mid_tk'])}")
+    if config['sw_beg_tk'] != []:
+        info_list.append(f"- stop words (tokens) at the beginning: {' '.join(config[f'sw_beg_tk'])}")
+    if config['sw_end_tk'] != []:
+        info_list.append(f"- stop words (tokens) at the end: {' '.join(config[f'sw_end_tk'])}")
+    if config['sw_mid_lem'] != []:
+        info_list.append(f"- stop words (lemmas): {' '.join(config[f'sw_mid_lem'])}")
+    if config['sw_beg_lem'] != []:
+        info_list.append(f"- stop words (lemmas) at the beginning: {' '.join(config[f'sw_beg_lem'])}")
+    if config['sw_end_lem'] != []:
+        info_list.append(f"- stop words (lemmas) at the end: {' '.join(config[f'sw_end_lem'])}")
+    if config['sw_mid_tag'] != []:
+        info_list.append(f"- stop words (tags): {' '.join(config[f'sw_mid_tag'])}")
+    if config['sw_beg_tag'] != []:
+        info_list.append(f"- stop words (tags) at the beginning: {' '.join(config[f'sw_beg_tag'])}")
+    if config['sw_end_tag'] != []:
+        info_list.append(f"- stop words (tags) at the end: {' '.join(config[f'sw_end_tag'])}")
+    if config['must_include_tk'] != []:
+        info_list.append(f"- must-include words (tokens): {config[f'must_include_tk']}")
+    if config['must_include_lem'] != []:
+        info_list.append(f"- must-include words (lemmas): {config[f'must_include_lem']}")
+    if config['must_include_tag'] != []:
+        info_list.append(f"- must-include words (tags): {config[f'must_include_tag']}")
+    if config['regex']:
+        info_list.append("- r (regex): True")
+    info_list.append(f"- Storage for intermadiate files: {config['DB']}")
+    if 'output' in config:
+        info_list.append(f"- O (output file): {config['output']}")
+
+    sys.stderr.write("\n".join(info_list))
+
+    while True:
+        answer = input("\n\nDo you wish to continue with those parameters? (y/n) ")
+        if re.match("y", answer) is not None:
+            break
+        elif re.match("[nN]", answer) is not None:
+            sys.stderr.write("Aborting\n")
+            sys.exit()
+        else:
+            sys.stderr.write("\nPlease answer with 'y' or 'n'\n")
 
 
     #### add iw and sw (useful for file names) ####
