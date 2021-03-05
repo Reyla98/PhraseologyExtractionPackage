@@ -1,6 +1,6 @@
 ######################################################################
 # This file is part of the PhraseologyExtractionPackage.             #
-# copywrithe (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021  #
+# Copyright (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021   #
 ######################################################################
 
 import re
@@ -124,7 +124,7 @@ class Ngram:
                 continue
             full_str += "".join(word)
             full_str += "|"
-            
+
         return full_str
 
 

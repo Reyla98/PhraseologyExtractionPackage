@@ -1,6 +1,6 @@
 ######################################################################
 # This file is part of the PhraseologyExtractionPackage.             #
-# copywrithe (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021  #
+# Copyright (c) Laurane Castiaux (laurane.castiaux@gmail.com) 2021   #
 ######################################################################
 
 import sys
