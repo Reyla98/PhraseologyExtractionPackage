@@ -477,4 +477,4 @@ class Pattern:
 
 
     def __hash__(self):
-        return hash(self.fullStr())
+        return hash(self.longStr())
