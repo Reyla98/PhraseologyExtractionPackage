@@ -24,5 +24,6 @@
 	"Min_Nbr_Variants" : null,
 	"Min_Range" : 1,
 	"Max_Range" : null,
-	"Min_Freq_Patterns" : 1
+	"Min_Freq_Patterns" : 1,
+    "Proportion_Freq_Examples" : 0
 }
