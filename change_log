@@ -1,6 +1,7 @@
 #
-Add the possibility to specify a -P, a float which represents the proportion of the parent frequency that a subpattern must have to be printed (e.g. if -P 0.2 is specified, and the parent pattern has frequency 50, only subpatterns with frequency 10 or higher will be printed)
-Remove wildcards (except for "/") in filenames on Unix systems
+- Add the possibility to specify a -P, a float which represents the proportion of the parent frequency that a subpattern must have to be printed (e.g. if -P 0.2 is specified, and the parent pattern has frequency 50, only subpatterns with frequency 10 or higher will be printed)
+- Ask confirmation that the parameters are correct before proceeding to extraction
+- Remove wildcards (except for "/") in filenames on Unix systems
 
 Bug fixes:
     - Frequency display
