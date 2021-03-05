@@ -467,11 +467,19 @@ class Pattern:
         for var_cur in all_vars:
             if self == var_cur:
                 continue
-            if var_cur.totFreq() >= config['Min_Freq_Examples']:
-                if isinstance(var_cur, Ngram):
-                    file.write("\t" * indent + var_cur.longStr())
-                else:
-                    var_cur.printAllVar(config, rank, file, indent, child=True)
+            if config['Min_Freq_Examples'] >= 1:
+                if var_cur.totFreq() >= config['Min_Freq_Examples']:
+                    if isinstance(var_cur, Ngram):
+                        file.write("\t" * indent + var_cur.longStr())
+                    else:
+                        var_cur.printAllVar(config, rank, file, indent, child=True)
+            else:
+                if var_cur.totFreq() >= config['Min_Freq_Examples'] * self.totFreq():
+                    if isinstance(var_cur, Ngram):
+                        file.write("\t" * indent + var_cur.longStr())
+                    else:
+                        var_cur.printAllVar(config, rank, file, indent, child=True)
+                        
         file.write("\n")
         return rank
 
