@@ -135,7 +135,7 @@ their examples when they are displayed"
         type=int,
         help="Minimum frequency of the patterns to be displayed")
     main_parser.add_argument("-E", "--Min-Freq-Examples",
-        type=int,
+        type=float,
         help="Minimum frequency of the examples of a pattern to be \
 displayed")
     main_parser.add_argument("--Max-Nbr-Variants",
