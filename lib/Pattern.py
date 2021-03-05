@@ -438,14 +438,6 @@ class Pattern:
             and self.nbr_var < config['Min_Nbr_Variants']:
                 return rank
 
-        if config['Sort'] == "frequency":
-            sorted_variants = sorted(self.var, key=Pattern.totFreq, reverse=True)
-            sorted_patterns = sorted(self.subPat, key=Pattern.totFreq, reverse=True)
-        elif config['Sort'] == "dispersion":
-            sorted_variants = sorted(self.var, key=Pattern.getDP)
-            sorted_patterns = sorted(self.subPat, key=Pattern.getDP)
-
-
         # check all conditions for parent pattern not to be printed
         if ( config['Min_Nbr_Variants'] is not None
         and len(self.var) < config['Min_Nbr_Variants'] ) \
@@ -457,7 +449,6 @@ class Pattern:
         and self.range() > config['Max_Range'] ):
             return rank
 
-
         # all conditions are fullfilled, parent pattern is printed
         if child:
             file.write("\t" * indent + self.longStr())
@@ -466,16 +457,21 @@ class Pattern:
             file.write(str(rank) + "  " + self.longStr())
         indent += 1
 
-
         # we also print all its children according to the user parameters
-        for var_cur in sorted_variants:
+        all_vars = self.var + self.subPat
+        if config['Sort'] == "frequency":
+            all_vars.sort(key=Pattern.totFreq, reverse=True)
+        elif config['Sort'] == "dispersion":
+            all_vars.sort(key=Pattern.getDP)
+
+        for var_cur in all_vars:
             if self == var_cur:
                 continue
             if var_cur.totFreq() >= config['Min_Freq_Examples']:
-                file.write("\t" * indent + var_cur.longStr())
-        for subPat_cur in sorted_patterns:
-            if subPat_cur.totFreq() >= config['Min_Freq_Examples']:
-                subPat_cur.printAllVar(config, rank, file, indent, child=True)
+                if isinstance(var_cur, Ngram):
+                    file.write("\t" * indent + var_cur.longStr())
+                else:
+                    var_cur.printAllVar(config, rank, file, indent, child=True)
         file.write("\n")
         return rank
 
