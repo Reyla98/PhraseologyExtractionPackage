@@ -380,6 +380,10 @@ class Pattern:
                     string = ""
                 elif self.node[1] is not None and i >= self.node[1]:
                     return string.strip()
+            elif self.types[i] == "tag":
+                string += f"_{self.elems[i]}_"
+            elif self.types[i] == "sple":
+                string += f"|{self.elems[i]}|"
             else:
                 string += f"{self.elems[i]} "
 
@@ -467,19 +471,13 @@ class Pattern:
         for var_cur in all_vars:
             if self == var_cur:
                 continue
-            if config['Min_Freq_Examples'] >= 1:
-                if var_cur.totFreq() >= config['Min_Freq_Examples']:
+            if var_cur.totFreq() >= config['Min_Freq_Examples']:
+                if var_cur.totFreq() >= config['Proportion_Freq_Examples'] * self.totFreq():
                     if isinstance(var_cur, Ngram):
                         file.write("\t" * indent + var_cur.longStr())
                     else:
                         var_cur.printAllVar(config, rank, file, indent, child=True)
-            else:
-                if var_cur.totFreq() >= config['Min_Freq_Examples'] * self.totFreq():
-                    if isinstance(var_cur, Ngram):
-                        file.write("\t" * indent + var_cur.longStr())
-                    else:
-                        var_cur.printAllVar(config, rank, file, indent, child=True)
-                        
+
         file.write("\n")
         return rank
 
