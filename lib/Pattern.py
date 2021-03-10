@@ -13,7 +13,7 @@ from pprint import pprint
 
 class Pattern:
 
-    def __init__(self, ngram_list, m, subcorpora_prop, deepness, child=False):
+    def __init__(self, ngram_list, m, subcorpora_prop, deepness=0):
         #### set the attributes ####
         self.var = None     #list of Ngrams
         self.nbr_var = None
@@ -23,7 +23,7 @@ class Pattern:
         self.node = None    #index of 1st & last common tokens
         self.DP = None
         self.subPat = None  #list of Patterns
-        self.deepness = None #number of parent patterns
+        self.deepness = deepness #number of parent patterns
 
 
         #### define some useful functions ####
@@ -72,6 +72,8 @@ class Pattern:
             return
 
         ngram_ref = ngram_list[0]
+        #print()
+        #print(ngram_ref)
         tags_ref = ngram_ref.tags
         sple_tags_ref = ngram_ref.sple_tags
         freq = ngram_ref.freq.copy()
@@ -86,9 +88,10 @@ class Pattern:
         types_backup = types.copy()
 
         for ngram_cur in ngram_list[1:]:
+            #print(ngram_cur)
 
             not_aligned = True
-            #error = 0
+            error = 0
             while not_aligned:
                 not_aligned = False
                 tokens_cur = ngram_cur.tokens
@@ -123,7 +126,7 @@ class Pattern:
                                     types[i] = "sple"
                                     elems[i] = sple_tags_cur[i]
                             else:
-                                if child == True:
+                                if self.deepness >= 1 :
                                     types[i] = "*"
                                     elems[i] = "*"
                                 else:
@@ -135,6 +138,9 @@ class Pattern:
                                     types = types_backup.copy()
                                     not_aligned = True
                                     error += 1 #################
+                                    print(error)
+                                    print("ref",ngram_ref.longStr())
+                                    print("cur", ngram_cur.longStr())
                                     break
                         else:
                             if tokens_cur[i] != "*" and types[i] is None:
@@ -250,14 +256,14 @@ class Pattern:
         # group variants per tag if odd deepness
         # group variants per lemma if even deepness
 
-        #try:
-        after_node = self.node[1]
-        #except :
-        #    print(self.elems)
-        #    for ngram in self.var:
-        #        print(ngram)
-        #    print()
-        #    return
+        try:
+            after_node = self.node[1]
+        except :
+            print(self.elems)
+            for ngram in self.var:
+                print(ngram)
+            print()
+            return
 
         if deepness%2 == 0:
             elem = "lemmas"
@@ -284,8 +290,7 @@ class Pattern:
                         self.subPat.append(Pattern(ngram_list,
                                                    m,
                                                    subcorpora_prop,
-                                                   deepness=deepness+1,
-                                                   child=True))
+                                                   deepness=deepness+1))
 
                 for var_cur in other:
                    self.var.append(var_cur)
@@ -319,8 +324,7 @@ class Pattern:
                 self.subPat.append(Pattern(ngram_list,
                                            m,
                                            subcorpora_prop,
-                                           deepness=deepness+1,
-                                           child=True))
+                                           deepness=deepness+1))
 
         self.var.extend(other)
 
@@ -431,8 +435,8 @@ class Pattern:
         return disp_range
 
 
-    def printAllVar(self, config, rank, file, indent=0, child=False):
-        if indent == 0:
+    def printAllVar(self, config, rank, file):
+        if self.deepness == 0:
             if self.totFreq() < config['Min_Freq_Patterns']:
                 return rank
             if config['Max_Nbr_Variants'] is not None\
@@ -454,12 +458,11 @@ class Pattern:
             return rank
 
         # all conditions are fullfilled, parent pattern is printed
-        if child:
-            file.write("\t" * indent + self.longStr())
+        if self.deepness > 0:
+            file.write("\t" * self.deepness + self.longStr())
         else:
             rank += 1
             file.write(str(rank) + "  " + self.longStr())
-        indent += 1
 
         # we also print all its children according to the user parameters
         all_vars = self.var + self.subPat
@@ -474,9 +477,9 @@ class Pattern:
             if var_cur.totFreq() >= config['Min_Freq_Examples']:
                 if var_cur.totFreq() >= config['Proportion_Freq_Examples'] * self.totFreq():
                     if isinstance(var_cur, Ngram):
-                        file.write("\t" * indent + var_cur.longStr())
+                        file.write("\t" * (self.deepness+1) + var_cur.longStr())
                     else:
-                        var_cur.printAllVar(config, rank, file, indent, child=True)
+                        var_cur.printAllVar(config, rank, file)
 
         file.write("\n")
         return rank
