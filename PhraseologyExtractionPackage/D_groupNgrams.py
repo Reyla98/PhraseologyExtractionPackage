@@ -59,7 +59,7 @@ class groupNgrams(luigi.Task):
             corpus_name,
             self.config['full_stop'],
             self.i
-            )) for corpus_name in self.config['corpus_name']]
+            )) for corpus_name in self.config['corpora_names']]
 
 
         #compute the proportional size of each subcorpur

@@ -187,18 +187,18 @@ command luigid.",
     if not args["update_defaults"]:
         args['corpora'] = args['input']
 
-        args['corpus_name'] = []
+        args['corpora_names'] = []
         corpora_path = os.path.abspath(args['corpora'])
         if os.path.isfile(corpora_path):
-            args['corpus_name'].append(str(os.path.splitext(
+            args['corpora_names'].append(str(os.path.splitext(
                 os.path.basename(args['corpora']))[0]))
             args['corpora'] = [corpora_path]
-            args['folder_name'] = args['corpus_name'][0]
+            args['folder_name'] = args['corpora_names'][0]
         elif os.path.isdir(corpora_path):
             args['folder_name'] = os.path.basename(corpora_path)
             args['corpora'] = [os.path.join(corpora_path, file) for file in os.listdir(args['corpora'])]
             for file in args['corpora']:
-                args['corpus_name'].append(str(os.path.splitext(
+                args['corpora_names'].append(str(os.path.splitext(
                 os.path.basename(file))[0]))
         else:
             raise ValueError(
