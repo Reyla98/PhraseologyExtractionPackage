@@ -136,26 +136,28 @@ their examples when they are displayed"
         help="Minimum frequency of the patterns to be displayed")
     main_parser.add_argument("-E", "--Min-Freq-Examples",
         type=int,
-        help="Minimum frequency of the examples of a pattern to be \
-displayed")
+        help="Minimum frequency of the examples of a pattern to be displayed")
     main_parser.add_argument("-P", "--Proportion-Freq-Examples",
         type=float,
         help="Proportion of the parent frequency that a subpattern \
 must reach to be displayed")
     main_parser.add_argument("--Max-Nbr-Variants",
         type=int,
-        help="Maximum number of variants a pattern must have to be \
-displayed")
+        help="Maximum number of variants a pattern must have to be displayed")
     main_parser.add_argument("--Min-Nbr-Variants",
         type=int,
-        help="Minimum number of variants a pattern must have to be \
-displayed")
+        help="Minimum number of variants a pattern must have to be displayed")
     main_parser.add_argument("-R", "--Min-Range",
         type=int,
         help="Minimum range a pattern must have to be displayed")
     main_parser.add_argument("--Max-Range",
         type=int,
         help="Maximum range a pattern must have to be displayed")
+    main_parser.add_argument("-p", "--positions",
+        nargs="+",
+        type=int,
+        help="index of the subcorpora that must contain a pattern for it \
+to be displayed (all other subcorpora must not contain it)")
 
 
     ### change_defaults subparser ###
@@ -207,11 +209,9 @@ command luigid.",
     if sys.platform == "win32" or sys.platform == "cygwin":
         args['local_scheduler'] = True
 
-    if 'DB' not in args:
-        args['DB'] = os.path.expanduser("~/Documents/PEP")
-
 
     #### parse default values ####
+
     try:
         with open(site.USER_BASE + str(pathlib.Path(
             '/config/PhraseologyExtractionPackage/default.json'))) \
@@ -229,6 +229,9 @@ command luigid.",
     else:
         updateDefaults(args, default)
         sys.exit("Default parameters were updated.\n")
+
+    if 'DB' not in config:
+        config['DB'] = os.path.expanduser("~/Documents/PEP")
 
 
     #### check the validity of some arguments ####
@@ -290,7 +293,9 @@ overwrite it? (y/n) ")
 
 
     #### Print arguments and ask for confirmation to continue ####
+
     info_list = ["The following arguments are going to be used:",
+                f"- i (corpus or subcorpora): {' '.join(config['corpora_names'])}",
                 f"- n (maximum size of the patterns): {config['n']}",
                 f"- m (minimum size of the patterns): {config['m']}",
                 f"- language (used by tree-tagger): {config['tree_tagger']}"]
@@ -304,6 +309,8 @@ overwrite it? (y/n) ")
         info_list.append(f"- R (minimum range): {config['Min_Range']}")
     if config['Max_Range'] is not None:
         info_list.append(f"- Maximum range: {config['Max_Range']}")
+    if config['positions'] is not None:
+        info_list.append(f"- p (corpora that must contain the pattern): {' '.join([config['corpora_names'][i-1] for i in config['positions']])}")
     if config['Min_Nbr_Variants'] is not None:
         info_list.append(f"- minimum number of variants: {config['Min_Nbr_Variants']}")
     if config['Max_Nbr_Variants'] is not None:
@@ -354,6 +361,7 @@ overwrite it? (y/n) ")
 
 
     #### add iw and sw (useful for file names) ####
+
     config['sw'] = []
     for elem in ["lem", "tk", "tag"]:
         for pos in ["beg", "mid", "end"]:

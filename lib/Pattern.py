@@ -324,8 +324,8 @@ class Pattern:
                 self.subPat.append(Pattern(ngram_list,
                                            m,
                                            subcorpora_prop,
-                                           deepness=deepness+1))
-
+                                           deepness=deepness+1,
+                                           child=True))
         self.var.extend(other)
 
 
@@ -446,7 +446,7 @@ class Pattern:
             and self.nbr_var < config['Min_Nbr_Variants']:
                 return rank
 
-        # check all conditions for parent pattern not to be printed
+        # check all conditions for parent pattern NOT to be printed
         if ( config['Min_Nbr_Variants'] is not None
         and len(self.var) < config['Min_Nbr_Variants'] ) \
         or ( config['Max_Nbr_Variants'] is not None
@@ -456,6 +456,15 @@ class Pattern:
         or ( config['Max_Range'] is not None
         and self.range() > config['Max_Range'] ):
             return rank
+
+        for i in range(len(self.freq)):
+            if i+1 in config['positions']:  #i+1 because index specified by user starts at 1 and not 0
+                if self.freq[i] == 0:
+                    return rank
+            else:
+                if self.freq[i] != 0 :
+                    return rank
+
 
         # all conditions are fullfilled, parent pattern is printed
         if self.deepness > 0:
