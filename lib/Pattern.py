@@ -8,8 +8,6 @@ import sys
 from itertools import islice
 from lib.Ngram import Ngram
 
-from pprint import pprint
-
 
 class Pattern:
 
@@ -327,6 +325,12 @@ class Pattern:
                                            deepness=deepness+1,
                                            child=True))
         self.var.extend(other)
+
+        #if only one pattern as variant, it is discarded and
+        #its children are brought one level up
+        if len(self.var) == 0 and len(self.subPat) == 1:
+            self.var = self.subPat[0].var
+            self.subPat = self.subPat[0].subPat
 
 
     def __eq__(self, other):
