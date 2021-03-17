@@ -58,8 +58,8 @@ be encoded in utf8 and that there should be no space in the file path!",
     main_parser.add_argument("--m", "-m",
         help="minimum number of elements constituting an n-gram",
         type=int)
-    main_parser.add_argument("--tree-tagger",
-        help="tree-tagger command to be used")
+    main_parser.add_argument("--language",
+        help="language used by tree-tagger")
     main_parser.add_argument("-s", "--full-stop",
         help="the tag used to identify the end of a sentence. If None, \
     ngram straddling several sentences will also be extracted")
@@ -295,10 +295,12 @@ overwrite it? (y/n) ")
 
 
     #### Print arguments and ask for confirmation to continue ####
+
     info_list = ["The following arguments are going to be used:",
+                f"- i (corpus or subcorpora): {' '.join(config['corpora_names'])}",
                 f"- n (maximum size of the patterns): {config['n']}",
                 f"- m (minimum size of the patterns): {config['m']}",
-                f"- language (used by tree-tagger): {config['tree_tagger']}"]
+                f"- language (used by tree-tagger): {config['language']}"]
     if config['Min_Freq_Patterns'] != 1:
         info_list.append(f"- F (minimum frequency of the patterns): {config['Min_Freq_Patterns']}")
     if config['Proportion_Freq_Examples'] != 0:
