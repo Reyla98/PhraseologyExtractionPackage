@@ -29,6 +29,8 @@ def updateDefaults(args, old_defaults):
                 new_defaults[sw] = []
         if new_defaults[f"must_include_{elem}"] == ["None"]:
             new_defaults[f"must_include_{elem}"] = []
+        if new_defaults['positions'] == ['None']:
+            new_defaults['positions'] = []
     with open(config_file, "w") as fout:
         json.dump(dict(new_defaults), fout)
 
@@ -136,26 +138,28 @@ their examples when they are displayed"
         help="Minimum frequency of the patterns to be displayed")
     main_parser.add_argument("-E", "--Min-Freq-Examples",
         type=int,
-        help="Minimum frequency of the examples of a pattern to be \
-displayed")
+        help="Minimum frequency of the examples of a pattern to be displayed")
     main_parser.add_argument("-P", "--Proportion-Freq-Examples",
         type=float,
         help="Proportion of the parent frequency that a subpattern \
 must reach to be displayed")
     main_parser.add_argument("--Max-Nbr-Variants",
         type=int,
-        help="Maximum number of variants a pattern must have to be \
-displayed")
+        help="Maximum number of variants a pattern must have to be displayed")
     main_parser.add_argument("--Min-Nbr-Variants",
         type=int,
-        help="Minimum number of variants a pattern must have to be \
-displayed")
+        help="Minimum number of variants a pattern must have to be displayed")
     main_parser.add_argument("-R", "--Min-Range",
         type=int,
         help="Minimum range a pattern must have to be displayed")
     main_parser.add_argument("--Max-Range",
         type=int,
         help="Maximum range a pattern must have to be displayed")
+    main_parser.add_argument("-p", "--positions",
+        nargs="+",
+        type=int,
+        help="index of the subcorpora that must contain a pattern for it \
+to be displayed (all other subcorpora must not contain it)")
 
 
     ### change_defaults subparser ###
@@ -207,11 +211,9 @@ command luigid.",
     if sys.platform == "win32" or sys.platform == "cygwin":
         args['local_scheduler'] = True
 
-    if 'DB' not in args:
-        args['DB'] = os.path.expanduser("~/Documents/PEP")
-
 
     #### parse default values ####
+
     try:
         with open(site.USER_BASE + str(pathlib.Path(
             '/config/PhraseologyExtractionPackage/default.json'))) \
@@ -229,6 +231,9 @@ command luigid.",
     else:
         updateDefaults(args, default)
         sys.exit("Default parameters were updated.\n")
+
+    if 'DB' not in config:
+        config['DB'] = os.path.expanduser("~/Documents/PEP")
 
 
     #### check the validity of some arguments ####
@@ -354,6 +359,7 @@ overwrite it? (y/n) ")
 
 
     #### add iw and sw (useful for file names) ####
+
     config['sw'] = []
     for elem in ["lem", "tk", "tag"]:
         for pos in ["beg", "mid", "end"]:
