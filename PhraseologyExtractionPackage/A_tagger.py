@@ -17,10 +17,10 @@ from collections import ChainMap
 
 class Tagger(luigi.Task):
     """
-    Launch tree-tagger, as a subprocess, on the corpus, with the tree-tagger 
-    command specified by the --tree-tagger argument. The default options of 
-    tree-tagger are used. words between <> are ignored by tree-tagger, so 
-    they will be ignored by PEP too. If you want to keep them, remove the <> 
+    Launch tree-tagger, as a subprocess, on the corpus, with the tree-tagger
+    command specified by the --tree-tagger argument. The default options of
+    tree-tagger are used. words between <> are ignored by tree-tagger, so
+    they will be ignored by PEP too. If you want to keep them, remove the <>
     symbols.
     """
 
@@ -42,6 +42,10 @@ class Tagger(luigi.Task):
         corpus_name = os.path.splitext(os.path.basename(self.file))[0]
         tmp_file = str(pathlib.Path(self.config['tmp'])) + \
                    str(pathlib.Path(f"/{corpus_name}.TT"))
+        if sys.platform == "win32" or sys.platform == "cygwin":
+            TT_command = f"tag-{self.config['language']}"
+        else:
+            TT_command = f"tree-tagger-{self.config['language']}"
 
         sent_list = []
         token_list = []
@@ -56,7 +60,7 @@ class Tagger(luigi.Task):
 
         with open(tmp_file, "w", encoding="utf-8") as TTfile:
             tree_tagger = subprocess.run(
-                f"{self.config['tree_tagger']} {self.file}",
+                f"{TT_command} {self.file}",
                 stdout = TTfile,
                 stderr = subprocess.DEVNULL,
                 shell=True)
@@ -71,7 +75,7 @@ class Tagger(luigi.Task):
                         sent_list.append(token_list)
                         token_list = []
             sent_list.append(token_list)
-                    
+
         os.remove(tmp_file)
 
 

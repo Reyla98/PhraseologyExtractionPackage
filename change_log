@@ -1,4 +1,5 @@
 #
+- -tree-tagger option was replaced by the option --language. Only the language used by tree-tagger must be specified, the tree-tagger command is not necessary anymore.
 - Add the possibility to specify the -P parameter, a float which represents the proportion of the parent frequency that a subpattern must have to be printed (e.g. if -P 0.2 is specified, and the parent pattern has frequency 50, only subpatterns with frequency 10 or higher will be printed)
 - Add the possibility to specify the -p parameter, which must be followed by the indexes of the subcorpora that should contain the patterns for them to be printed (all other subcorpora must NOT contain it)
 - Ask confirmation that the parameters are correct before proceeding to extraction
