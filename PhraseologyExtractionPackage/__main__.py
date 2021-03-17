@@ -30,7 +30,7 @@ def updateDefaults(args, old_defaults):
         if new_defaults[f"must_include_{elem}"] == ["None"]:
             new_defaults[f"must_include_{elem}"] = []
         if new_defaults['positions'] == ['None']:
-            new_defaults['positions'] = []
+            new_defaults['positions'] = None
     with open(config_file, "w") as fout:
         json.dump(dict(new_defaults), fout)
 
@@ -300,7 +300,7 @@ overwrite it? (y/n) ")
                 f"- i (corpus or subcorpora): {' '.join(config['corpora_names'])}",
                 f"- n (maximum size of the patterns): {config['n']}",
                 f"- m (minimum size of the patterns): {config['m']}",
-                f"- language (used by tree-tagger): {config['language']}"]
+                f"- l (language used by tree-tagger): {config['language']}"]
     if config['Min_Freq_Patterns'] != 1:
         info_list.append(f"- F (minimum frequency of the patterns): {config['Min_Freq_Patterns']}")
     if config['Proportion_Freq_Examples'] != 0:
@@ -311,7 +311,7 @@ overwrite it? (y/n) ")
         info_list.append(f"- R (minimum range): {config['Min_Range']}")
     if config['Max_Range'] is not None:
         info_list.append(f"- Maximum range: {config['Max_Range']}")
-    if config['positions'] != []:
+    if config['positions'] is not None:
         info_list.append(f"- p (corpora that must contain the pattern): {' '.join([config['corpora_names'][i-1] for i in config['positions']])}")
     if config['Min_Nbr_Variants'] is not None:
         info_list.append(f"- minimum number of variants: {config['Min_Nbr_Variants']}")

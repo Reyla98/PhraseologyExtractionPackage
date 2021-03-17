@@ -25,5 +25,5 @@
 	"Max_Range" : null,
 	"Min_Freq_Patterns" : 1,
     "Proportion_Freq_Examples" : 0,
-    "positions" : []
+    "positions" : null
 }
