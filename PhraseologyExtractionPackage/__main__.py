@@ -29,6 +29,8 @@ def updateDefaults(args, old_defaults):
                 new_defaults[sw] = []
         if new_defaults[f"must_include_{elem}"] == ["None"]:
             new_defaults[f"must_include_{elem}"] = []
+        if new_defaults['positions'] == ['None']:
+            new_defaults['positions'] = None
     with open(config_file, "w") as fout:
         json.dump(dict(new_defaults), fout)
 
@@ -56,8 +58,8 @@ be encoded in utf8 and that there should be no space in the file path!",
     main_parser.add_argument("--m", "-m",
         help="minimum number of elements constituting an n-gram",
         type=int)
-    main_parser.add_argument("--tree-tagger",
-        help="tree-tagger command to be used")
+    main_parser.add_argument("--language",
+        help="language used by tree-tagger")
     main_parser.add_argument("-s", "--full-stop",
         help="the tag used to identify the end of a sentence. If None, \
     ngram straddling several sentences will also be extracted")
@@ -298,7 +300,7 @@ overwrite it? (y/n) ")
                 f"- i (corpus or subcorpora): {' '.join(config['corpora_names'])}",
                 f"- n (maximum size of the patterns): {config['n']}",
                 f"- m (minimum size of the patterns): {config['m']}",
-                f"- language (used by tree-tagger): {config['tree_tagger']}"]
+                f"- l (language used by tree-tagger): {config['language']}"]
     if config['Min_Freq_Patterns'] != 1:
         info_list.append(f"- F (minimum frequency of the patterns): {config['Min_Freq_Patterns']}")
     if config['Proportion_Freq_Examples'] != 0:
