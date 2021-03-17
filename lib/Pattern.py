@@ -324,9 +324,14 @@ class Pattern:
                 self.subPat.append(Pattern(ngram_list,
                                            m,
                                            subcorpora_prop,
-                                           deepness=deepness+1,
-                                           child=True))
+                                           deepness=deepness+1))
         self.var.extend(other)
+
+        #if only one pattern as variant, it is discarded and
+        #its children are brought one level up
+        if len(self.var) == 0 and len(self.subPat) == 1:
+            self.var = self.subPat[0].var
+            self.subPat = self.subPat[0].subPat
 
 
     def __eq__(self, other):
@@ -457,13 +462,14 @@ class Pattern:
         and self.range() > config['Max_Range'] ):
             return rank
 
-        for i in range(len(self.freq)):
-            if i+1 in config['positions']:  #i+1 because index specified by user starts at 1 and not 0
-                if self.freq[i] == 0:
-                    return rank
-            else:
-                if self.freq[i] != 0 :
-                    return rank
+        if config['positions'] is not None:
+            for i in range(len(self.freq)):
+                if i+1 in config['positions']:  #i+1 because index specified by user starts at 1 and not 0
+                    if self.freq[i] == 0:
+                        return rank
+                else:
+                    if self.freq[i] != 0 :
+                        return rank
 
 
         # all conditions are fullfilled, parent pattern is printed
