@@ -14,7 +14,7 @@
 	"must_include_tag" : [],
 	"must_include_lem" : [],
 	"must_include_tk" : [],
-	"tree_tagger": "tree-tagger-english",
+	"language": "english",
 	"full_stop" : "SENT",
 	"DB" : null,
     "Min_Freq_Examples" : 1,
@@ -24,5 +24,6 @@
 	"Min_Range" : 1,
 	"Max_Range" : null,
 	"Min_Freq_Patterns" : 1,
-    "Proportion_Freq_Examples" : 0
+    "Proportion_Freq_Examples" : 0,
+    "positions" : []
 }

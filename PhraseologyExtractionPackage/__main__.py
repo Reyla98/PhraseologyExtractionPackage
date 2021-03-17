@@ -309,6 +309,8 @@ overwrite it? (y/n) ")
         info_list.append(f"- R (minimum range): {config['Min_Range']}")
     if config['Max_Range'] is not None:
         info_list.append(f"- Maximum range: {config['Max_Range']}")
+    if config['positions'] != []:
+        info_list.append(f"- p (corpora that must contain the pattern): {' '.join([config['corpora_names'][i-1] for i in config['positions']])}")
     if config['Min_Nbr_Variants'] is not None:
         info_list.append(f"- minimum number of variants: {config['Min_Nbr_Variants']}")
     if config['Max_Nbr_Variants'] is not None:
