@@ -82,7 +82,6 @@ class Pattern:
         elems = tokens_ref.copy()
         var = [ngram_ref]
         types = [None for i in range(len(elems))]
-        diff = [ {} for i in range(len(elems))]
 
         elems_backup = elems.copy()
         types_backup = types.copy()
@@ -100,13 +99,13 @@ class Pattern:
                 sple_tags_cur = ngram_cur.sple_tags
                 for i in range(len(elems)):
                     try:
-                        if tokens_ref[i] != tokens_cur[i]:
+                        if tokens_ref[i] == tokens_cur[i]:
+                            if tokens_cur[i] != "*" and types[i] is None:
+                                types[i] = "tk"
+                        else:
                             if tokens_ref[i] == "*":
                                 if tokens_cur[i] != "*":
                                     types[i] = "*"
-                                if lemmas_cur[i] != "*":
-                                    diff[i].setdefault(lemmas_cur[i], 0)
-                                    diff[i][lemmas_cur[i]] += ngram_cur.totFreq()
                             elif lemmas_cur[i] == lemmas_ref[i]:
                                 if types[i] == "tk" \
                                 or types[i] is None:
@@ -142,41 +141,13 @@ class Pattern:
                                     print("ref",ngram_ref.longStr())
                                     print("cur", ngram_cur.longStr())
                                     break
-                        else:
-                            if tokens_cur[i] != "*" and types[i] is None:
-                                types[i] = "tk"
+
                     except IndexError:
                         ngram_cur.addSlotStart(1)
                         elems = elems_backup.copy()
                         types = types_backup.copy()
                         not_aligned = True
                         break
-
-
-                    ### remove all variants with only one occurrence ###
-                    to_del = []
-                    for variant, freq_variant in diff[i].items():
-                        if freq_variant == 1:
-                            to_del.append(variant)
-                    for variant in to_del:
-                        diff[i].pop(variant)
-                    ### ### ###
-
-
-                    variants = list(diff[i].keys())
-                    nbr_variants = len(variants)
-
-                    if nbr_variants == 1:
-                        types[i] = "var1"
-                        elems[i] = variants
-
-                    elif nbr_variants == 2:
-                        types[i] = "var2"
-                        elems[i] = variants
-
-                    elif nbr_variants > 2:
-                        types[i] = "*"
-                        elems[i] = "*"
 
                     types_backup = types.copy()
                     elems_backup = elems.copy()
@@ -327,6 +298,12 @@ class Pattern:
                                            deepness=deepness+1))
         self.var.extend(other)
 
+        #if only one pattern as variant, it is discarded and
+        #its children are brought one level up
+        if len(self.var) == 0 and len(self.subPat) == 1:
+            self.var = self.subPat[0].var
+            self.subPat = self.subPat[0].subPat
+
 
     def __eq__(self, other):
         if isinstance(other, Ngram):
@@ -374,19 +351,16 @@ class Pattern:
         string = ""
         for i in range(len(self.elems)):
             if self.types[i] == "lem":
-                string += f"°{self.elems[i]}° "
-            elif self.types[i] == "var1" or self.types[i] == "var2":
-                variants = "/".join(self.elems[i])
-                string += f"({variants}) "
+                string += f"*{self.elems[i]}* "
             elif self.types[i] == "*":
                 if i < self.node[0]:
                     string = ""
                 elif self.node[1] is not None and i >= self.node[1]:
                     return string.strip()
             elif self.types[i] == "tag":
-                string += f"_{self.elems[i]}_"
+                string += f"{self.elems[i]} "
             elif self.types[i] == "sple":
-                string += f"|{self.elems[i]}|"
+                string += f"*{self.elems[i]}* "
             else:
                 string += f"{self.elems[i]} "
 
@@ -402,31 +376,11 @@ class Pattern:
             )
 
 
-    def computeP(self):
-        """
-        compute the number of non fixed elements
-        """
-        first_elem_index = 0
-        last_elem_index = 0
-        for i, e in enumerate(self.elems):
-            if e != "*":
-                if first_elem_index == 0:
-                    first_elem_index == i
-                last_elem_index = i
-
-        nbr_non_fixed_elems = 0
-        for e in range(first_elem_index, last_elem_index + 1):
-            if e == "*" or isinstance(e, list):
-                nbr_non_fixed_elems += 1
-
-        return nbr_non_fixed_elems
-
-
     def getDP(self):
         return self.DP
 
 
-    def range(self):
+    def computeRange(self):
         disp_range = 0
         for freq_cur in self.freq:
             if freq_cur != 0:
@@ -451,9 +405,9 @@ class Pattern:
         or ( config['Max_Nbr_Variants'] is not None
         and len(self.var) > config['Max_Nbr_Variants'] ) \
         or ( config['Min_Range'] is not None
-        and self.range() < config['Min_Range'] ) \
+        and self.computeRange() < config['Min_Range'] ) \
         or ( config['Max_Range'] is not None
-        and self.range() > config['Max_Range'] ):
+        and self.computeRange() > config['Max_Range'] ):
             return rank
 
         if config['positions'] is not None:
