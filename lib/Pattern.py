@@ -26,38 +26,7 @@ class Pattern:
         self.deepness = deepness #number of parent patterns
 
 
-        #### define some useful functions ####
-        def matchNgrams(n1, n2):
-            for e1, e2 in zip(n1, n2):
-                if e1 == "*" or e1 == e2:
-                    pass
-                else:
-                    return False
-            return True
-
-
-        def realign(ngram):
-            if ngram.tokens[-1] == "*":
-                ngram.removeSlotEnd()
-                ngram.addSlotStart(1)
-            else:
-                raise ValueError
-
-
-        def resetAlign(ngram_ref, ngram_cur):
-            while ngram_cur.tokens[0] == "*":
-                ngram_cur.removeSlotStart()
-                ngram_cur.addSlotEnd(1)
-
-            while len(ngram_cur) < len(ngram_ref):
-                ngram_cur.addSlotEnd(1)
-
-            while not matchNgrams(ngram_ref.lemmas, ngram_cur.lemmas):
-                ngram_cur.addSlotStart(1)
-                ngram_cur.removeSlotEnd()
-
-
-        #### initialize Pattern ####
+        #### initialize Pattern if only 1 ngram ####
         if len(ngram_list) == 1:
             ngram_ref = ngram_list[0]
             self.var = []
@@ -71,94 +40,61 @@ class Pattern:
             self.deepness = deepness
             return
 
+        #### initialize Pattern if more than 1 ngram ####
         ngram_ref = ngram_list[0]
-        #print()
-        #print(ngram_ref)
         tags_ref = ngram_ref.tags
         sple_tags_ref = ngram_ref.sple_tags
-        freq = ngram_ref.freq.copy()
         tokens_ref = ngram_ref.tokens.copy()
         lemmas_ref = ngram_ref.lemmas.copy()
         elems = tokens_ref.copy()
         var = [ngram_ref]
-        types = [None for i in range(len(elems))]
-
-        elems_backup = elems.copy()
-        types_backup = types.copy()
+        types = ["*" if x == "*" else "tk" for x in elems]
 
         for ngram_cur in ngram_list[1:]:
-            #print(ngram_cur)
-
-            not_aligned = True
-            error = 0
-            while not_aligned:
-                not_aligned = False
+            aligned = False
+            while not aligned:
+                aligned = True
                 tokens_cur = ngram_cur.tokens
                 lemmas_cur = ngram_cur.lemmas
                 tags_cur = ngram_cur.tags
                 sple_tags_cur = ngram_cur.sple_tags
                 for i in range(len(elems)):
                     try:
-                        if tokens_ref[i] == tokens_cur[i]:
-                            if tokens_cur[i] != "*" and types[i] is None:
-                                types[i] = "tk"
+                        if tokens_cur[i] == "*":
+                            pass
+                        elif tokens_cur[i] == tokens_ref[i]:
+                            pass
+                        elif lemmas_cur[i] == lemmas_ref[i]:
+                            if types[i] == "tk" \
+                            or types[i] == "*":
+                                types[i] = "lem"
+                                elems[i] = lemmas_cur[i]
+                        elif tags_cur[i] == tags_ref[i]:
+                            if types[i] == "tk" \
+                            or types[i] == "lem" \
+                            or types[i] == "*" :
+                                types[i] = "tag"
+                                elems[i] = tags_cur[i]
+                        elif sple_tags_cur[i] == sple_tags_ref[i]:
+                            if types[i] == "tk" \
+                            or types[i] == "lem" \
+                            or types[i] == "tag" \
+                            or types[i] == "*":
+                                types[i] = "sple"
+                                elems[i] = sple_tags_cur[i]
                         else:
-                            if tokens_ref[i] == "*":
-                                if tokens_cur[i] != "*":
-                                    types[i] = "*"
-                            elif lemmas_cur[i] == lemmas_ref[i]:
-                                if types[i] == "tk" \
-                                or types[i] is None:
-                                    types[i] = "lem"
-                                    elems[i] = lemmas_cur[i]
-                            elif tags_cur[i] == tags_ref[i]:
-                                if types[i] == "tk" \
-                                or types[i] == "lem" \
-                                or types[i] is None:
-                                    types[i] = "tag"
-                                    elems[i] = tags_cur[i]
-                            elif sple_tags_cur[i] == sple_tags_ref[i]:
-                                if types[i] == "tk" \
-                                or types[i] == "lem" \
-                                or types[i] == "tag"\
-                                or types[i] is None:
-                                    types[i] = "sple"
-                                    elems[i] = sple_tags_cur[i]
-                            else:
-                                if self.deepness >= 1 :
-                                    types[i] = "*"
-                                    elems[i] = "*"
-                                else:
-                                    try:
-                                        realign(ngram_cur)
-                                    except ValueError:
-                                        resetAlign(ngram_ref, ngram_cur)
-                                    elems = elems_backup.copy()
-                                    types = types_backup.copy()
-                                    not_aligned = True
-                                    error += 1 #################
-                                    print(error)
-                                    print("ref",ngram_ref.longStr())
-                                    print("cur", ngram_cur.longStr())
-                                    break
+                            types[i] = "*"
+                            elems[i] = "*"
 
                     except IndexError:
                         ngram_cur.addSlotStart(1)
-                        elems = elems_backup.copy()
-                        types = types_backup.copy()
-                        not_aligned = True
+                        aligned = False
                         break
 
-                    types_backup = types.copy()
-                    elems_backup = elems.copy()
-
-            if not not_aligned:
-                var.append(ngram_cur)
-                types_backup = types.copy()
-                elems_backup = elems.copy()
+            var.append(ngram_cur)
 
 
-        #### removing extra slots ####
+        ### removing extra slots ###
         start = 0
         for t in types:
             if t is None:
@@ -212,7 +148,7 @@ class Pattern:
                 counted_ngrams.add(var_cur.fullStr())
 
 
-        #### initiate the pattern ####
+        #### set the right values for the attributes ####
         self.freq = freq
         self.elems = elems
         self.types = types
