@@ -20,7 +20,7 @@ class Pattern:
         self.elems = None
         self.types = None
         self.freq = None    #list of int
-        self.node = None    #index of 1st & last common tokens
+        self.core = None    #index of 1st & last common tokens
         self.DP = None
         self.subPat = None  #list of Patterns
         self.deepness = deepness #number of parent patterns
@@ -34,7 +34,7 @@ class Pattern:
             self.elems = ngram_ref.tokens
             self.types = ["tk" for i in range(len(ngram_ref))]
             self.freq = ngram_ref.freq
-            self.node = [0, None]
+            self.core = [0, None]
             self.DP = self.computeDP(subcorpora_prop)
             self.subPat = []
             self.deepness = deepness
@@ -122,18 +122,18 @@ class Pattern:
             elems = list(islice(elems, start, None))
 
 
-        #### finding node (index of 1st & last common tokens) ####
-        node = None
+        #### finding core (index of 1st & last common tokens) ####
+        core = None
         count_common = 0
         for i, t in enumerate(types):
             if t != "lem" and t != "tk":
-                if node is not None:
+                if core is not None:
                     break
                 count_common = 0
             else:
                 count_common += 1
                 if count_common >= m:
-                    node = [i - count_common + 1, i + 1]
+                    core = [i - count_common + 1, i + 1]
 
 
         #### compute freq
@@ -154,17 +154,17 @@ class Pattern:
         self.types = types
         self.var = var
         self.nbr_var = len(var)
-        self.node = node
+        self.core = core
         self.subPat = []
         self.DP = self.computeDP(subcorpora_prop)
 
 
-        #### group variants based on what follows the node ####
+        #### group variants based on what follows the core ####
         # group variants per tag if odd deepness
         # group variants per lemma if even deepness
 
         try:
-            after_node = self.node[1]
+            after_core = self.core[1]
         except :
             print(self.elems)
             for ngram in self.var:
@@ -178,11 +178,11 @@ class Pattern:
             elem = "sple_tags"
 
         try:
-            if after_node is not None: #there is sth after the node
+            if after_core is not None: #there is sth after the core
                 elem_vars = {}
                 other = []
                 for var_cur in self.var:
-                    elem_var_cur = getattr(var_cur, elem)[after_node]
+                    elem_var_cur = getattr(var_cur, elem)[after_core]
                     if elem_var_cur != "*":
                         elem_vars.setdefault(elem_var_cur, [])
                         elem_vars[elem_var_cur].append(var_cur)
@@ -202,12 +202,12 @@ class Pattern:
                 for var_cur in other:
                    self.var.append(var_cur)
 
-        except IndexError: #nothing after node
+        except IndexError: #nothing after core
             pass
 
-        #### group variants based on what precedes the node ####
-        before_node = self.node[0] -1
-        if before_node < 0: #nothing before node
+        #### group variants based on what precedes the core ####
+        before_core = self.core[0] -1
+        if before_core < 0: #nothing before core
             return
 
         elem_vars = {}
@@ -216,7 +216,7 @@ class Pattern:
             if isinstance(var_cur, Pattern):
                 other.append(var_cur)
             else:
-                elem_var_cur = getattr(var_cur, elem)[before_node]
+                elem_var_cur = getattr(var_cur, elem)[before_core]
                 if elem_var_cur != "*":
                     elem_vars.setdefault(elem_var_cur, [])
                     elem_vars[elem_var_cur].append(var_cur)
@@ -295,9 +295,9 @@ class Pattern:
             elif self.types[i] == "sple":
                 string.append(f"*{self.elems[i]}*")
             elif self.types[i] == "*":
-                if i < self.node[0]:
+                if i < self.core[0]:
                     string = []
-                elif self.node[1] is not None and i >= self.node[1]:
+                elif self.core[1] is not None and i >= self.core[1]:
                     return " ".join(string)
 
         return " ".join(string)
