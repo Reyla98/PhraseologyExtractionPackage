@@ -20,44 +20,13 @@ class Pattern:
         self.elems = None
         self.types = None
         self.freq = None    #list of int
-        self.node = None    #index of 1st & last common tokens
+        self.core = None    #index of 1st & last common tokens
         self.DP = None
         self.subPat = None  #list of Patterns
         self.deepness = deepness #number of parent patterns
 
 
-        #### define some useful functions ####
-        def matchNgrams(n1, n2):
-            for e1, e2 in zip(n1, n2):
-                if e1 == "*" or e1 == e2:
-                    pass
-                else:
-                    return False
-            return True
-
-
-        def realign(ngram):
-            if ngram.tokens[-1] == "*":
-                ngram.removeSlotEnd()
-                ngram.addSlotStart(1)
-            else:
-                raise ValueError
-
-
-        def resetAlign(ngram_ref, ngram_cur):
-            while ngram_cur.tokens[0] == "*":
-                ngram_cur.removeSlotStart()
-                ngram_cur.addSlotEnd(1)
-
-            while len(ngram_cur) < len(ngram_ref):
-                ngram_cur.addSlotEnd(1)
-
-            while not matchNgrams(ngram_ref.lemmas, ngram_cur.lemmas):
-                ngram_cur.addSlotStart(1)
-                ngram_cur.removeSlotEnd()
-
-
-        #### initialize Pattern ####
+        #### initialize Pattern if only 1 ngram ####
         if len(ngram_list) == 1:
             ngram_ref = ngram_list[0]
             self.var = []
@@ -65,129 +34,67 @@ class Pattern:
             self.elems = ngram_ref.tokens
             self.types = ["tk" for i in range(len(ngram_ref))]
             self.freq = ngram_ref.freq
-            self.node = [0, None]
+            self.core = [0, None]
             self.DP = self.computeDP(subcorpora_prop)
             self.subPat = []
             self.deepness = deepness
             return
 
+        #### initialize Pattern if more than 1 ngram ####
         ngram_ref = ngram_list[0]
-        #print()
-        #print(ngram_ref)
         tags_ref = ngram_ref.tags
         sple_tags_ref = ngram_ref.sple_tags
-        freq = ngram_ref.freq.copy()
         tokens_ref = ngram_ref.tokens.copy()
         lemmas_ref = ngram_ref.lemmas.copy()
         elems = tokens_ref.copy()
         var = [ngram_ref]
-        types = [None for i in range(len(elems))]
-        diff = [ {} for i in range(len(elems))]
-
-        elems_backup = elems.copy()
-        types_backup = types.copy()
+        types = ["*" if x == "*" else "tk" for x in elems]
 
         for ngram_cur in ngram_list[1:]:
-            #print(ngram_cur)
-
-            not_aligned = True
-            error = 0
-            while not_aligned:
-                not_aligned = False
+            aligned = False
+            while not aligned:
+                aligned = True
                 tokens_cur = ngram_cur.tokens
                 lemmas_cur = ngram_cur.lemmas
                 tags_cur = ngram_cur.tags
                 sple_tags_cur = ngram_cur.sple_tags
                 for i in range(len(elems)):
                     try:
-                        if tokens_ref[i] != tokens_cur[i]:
-                            if tokens_ref[i] == "*":
-                                if tokens_cur[i] != "*":
-                                    types[i] = "*"
-                                if lemmas_cur[i] != "*":
-                                    diff[i].setdefault(lemmas_cur[i], 0)
-                                    diff[i][lemmas_cur[i]] += ngram_cur.totFreq()
-                            elif lemmas_cur[i] == lemmas_ref[i]:
-                                if types[i] == "tk" \
-                                or types[i] is None:
-                                    types[i] = "lem"
-                                    elems[i] = lemmas_cur[i]
-                            elif tags_cur[i] == tags_ref[i]:
-                                if types[i] == "tk" \
-                                or types[i] == "lem" \
-                                or types[i] is None:
-                                    types[i] = "tag"
-                                    elems[i] = tags_cur[i]
-                            elif sple_tags_cur[i] == sple_tags_ref[i]:
-                                if types[i] == "tk" \
-                                or types[i] == "lem" \
-                                or types[i] == "tag"\
-                                or types[i] is None:
-                                    types[i] = "sple"
-                                    elems[i] = sple_tags_cur[i]
-                            else:
-                                if self.deepness >= 1 :
-                                    types[i] = "*"
-                                    elems[i] = "*"
-                                else:
-                                    try:
-                                        realign(ngram_cur)
-                                    except ValueError:
-                                        resetAlign(ngram_ref, ngram_cur)
-                                    elems = elems_backup.copy()
-                                    types = types_backup.copy()
-                                    not_aligned = True
-                                    error += 1 #################
-                                    print(error)
-                                    print("ref",ngram_ref.longStr())
-                                    print("cur", ngram_cur.longStr())
-                                    break
+                        if tokens_cur[i] == "*":
+                            pass
+                        elif tokens_cur[i] == tokens_ref[i]:
+                            pass
+                        elif lemmas_cur[i] == lemmas_ref[i]:
+                            if types[i] == "tk" \
+                            or types[i] == "*":
+                                types[i] = "lem"
+                                elems[i] = lemmas_cur[i]
+                        elif tags_cur[i] == tags_ref[i]:
+                            if types[i] == "tk" \
+                            or types[i] == "lem" \
+                            or types[i] == "*" :
+                                types[i] = "tag"
+                                elems[i] = tags_cur[i]
+                        elif sple_tags_cur[i] == sple_tags_ref[i]:
+                            if types[i] == "tk" \
+                            or types[i] == "lem" \
+                            or types[i] == "tag" \
+                            or types[i] == "*":
+                                types[i] = "sple"
+                                elems[i] = sple_tags_cur[i]
                         else:
-                            if tokens_cur[i] != "*" and types[i] is None:
-                                types[i] = "tk"
+                            types[i] = "*"
+                            elems[i] = "*"
+
                     except IndexError:
                         ngram_cur.addSlotStart(1)
-                        elems = elems_backup.copy()
-                        types = types_backup.copy()
-                        not_aligned = True
+                        aligned = False
                         break
 
-
-                    ### remove all variants with only one occurrence ###
-                    to_del = []
-                    for variant, freq_variant in diff[i].items():
-                        if freq_variant == 1:
-                            to_del.append(variant)
-                    for variant in to_del:
-                        diff[i].pop(variant)
-                    ### ### ###
+            var.append(ngram_cur)
 
 
-                    variants = list(diff[i].keys())
-                    nbr_variants = len(variants)
-
-                    if nbr_variants == 1:
-                        types[i] = "var1"
-                        elems[i] = variants
-
-                    elif nbr_variants == 2:
-                        types[i] = "var2"
-                        elems[i] = variants
-
-                    elif nbr_variants > 2:
-                        types[i] = "*"
-                        elems[i] = "*"
-
-                    types_backup = types.copy()
-                    elems_backup = elems.copy()
-
-            if not not_aligned:
-                var.append(ngram_cur)
-                types_backup = types.copy()
-                elems_backup = elems.copy()
-
-
-        #### removing extra slots ####
+        ### removing extra slots ###
         start = 0
         for t in types:
             if t is None:
@@ -215,18 +122,18 @@ class Pattern:
             elems = list(islice(elems, start, None))
 
 
-        #### finding node (index of 1st & last common tokens) ####
-        node = None
+        #### finding core (index of 1st & last common tokens) ####
+        core = None
         count_common = 0
         for i, t in enumerate(types):
             if t != "lem" and t != "tk":
-                if node is not None:
+                if core is not None:
                     break
                 count_common = 0
             else:
                 count_common += 1
                 if count_common >= m:
-                    node = [i - count_common + 1, i + 1]
+                    core = [i - count_common + 1, i + 1]
 
 
         #### compute freq
@@ -241,23 +148,23 @@ class Pattern:
                 counted_ngrams.add(var_cur.fullStr())
 
 
-        #### initiate the pattern ####
+        #### set the right values for the attributes ####
         self.freq = freq
         self.elems = elems
         self.types = types
         self.var = var
         self.nbr_var = len(var)
-        self.node = node
+        self.core = core
         self.subPat = []
         self.DP = self.computeDP(subcorpora_prop)
 
 
-        #### group variants based on what follows the node ####
+        #### group variants based on what follows the core ####
         # group variants per tag if odd deepness
         # group variants per lemma if even deepness
 
         try:
-            after_node = self.node[1]
+            after_core = self.core[1]
         except :
             print(self.elems)
             for ngram in self.var:
@@ -271,11 +178,11 @@ class Pattern:
             elem = "sple_tags"
 
         try:
-            if after_node is not None: #there is sth after the node
+            if after_core is not None: #there is sth after the core
                 elem_vars = {}
                 other = []
                 for var_cur in self.var:
-                    elem_var_cur = getattr(var_cur, elem)[after_node]
+                    elem_var_cur = getattr(var_cur, elem)[after_core]
                     if elem_var_cur != "*":
                         elem_vars.setdefault(elem_var_cur, [])
                         elem_vars[elem_var_cur].append(var_cur)
@@ -295,12 +202,12 @@ class Pattern:
                 for var_cur in other:
                    self.var.append(var_cur)
 
-        except IndexError: #nothing after node
+        except IndexError: #nothing after core
             pass
 
-        #### group variants based on what precedes the node ####
-        before_node = self.node[0] -1
-        if before_node < 0: #nothing before node
+        #### group variants based on what precedes the core ####
+        before_core = self.core[0] -1
+        if before_core < 0: #nothing before core
             return
 
         elem_vars = {}
@@ -309,7 +216,7 @@ class Pattern:
             if isinstance(var_cur, Pattern):
                 other.append(var_cur)
             else:
-                elem_var_cur = getattr(var_cur, elem)[before_node]
+                elem_var_cur = getattr(var_cur, elem)[before_core]
                 if elem_var_cur != "*":
                     elem_vars.setdefault(elem_var_cur, [])
                     elem_vars[elem_var_cur].append(var_cur)
@@ -377,26 +284,23 @@ class Pattern:
 
 
     def __str__(self):
-        string = ""
+        string = []
         for i in range(len(self.elems)):
-            if self.types[i] == "lem":
-                string += f"°{self.elems[i]}° "
-            elif self.types[i] == "var1" or self.types[i] == "var2":
-                variants = "/".join(self.elems[i])
-                string += f"({variants}) "
-            elif self.types[i] == "*":
-                if i < self.node[0]:
-                    string = ""
-                elif self.node[1] is not None and i >= self.node[1]:
-                    return string.strip()
+            if self.types[i] == "tk":
+                string.append(self.elems[i])
+            elif self.types[i] == "lem":
+                string.append(f"*{self.elems[i]}*")
             elif self.types[i] == "tag":
-                string += f"_{self.elems[i]}_"
+                string.append(self.elems[i])
             elif self.types[i] == "sple":
-                string += f"|{self.elems[i]}|"
-            else:
-                string += f"{self.elems[i]} "
+                string.append(f"*{self.elems[i]}*")
+            elif self.types[i] == "*":
+                if i < self.core[0]:
+                    string = []
+                elif self.core[1] is not None and i >= self.core[1]:
+                    return " ".join(string)
 
-        return string.strip()
+        return " ".join(string)
 
 
     def longStr(self):
@@ -408,31 +312,11 @@ class Pattern:
             )
 
 
-    def computeP(self):
-        """
-        compute the number of non fixed elements
-        """
-        first_elem_index = 0
-        last_elem_index = 0
-        for i, e in enumerate(self.elems):
-            if e != "*":
-                if first_elem_index == 0:
-                    first_elem_index == i
-                last_elem_index = i
-
-        nbr_non_fixed_elems = 0
-        for e in range(first_elem_index, last_elem_index + 1):
-            if e == "*" or isinstance(e, list):
-                nbr_non_fixed_elems += 1
-
-        return nbr_non_fixed_elems
-
-
     def getDP(self):
         return self.DP
 
 
-    def range(self):
+    def computeRange(self):
         disp_range = 0
         for freq_cur in self.freq:
             if freq_cur != 0:
@@ -457,9 +341,9 @@ class Pattern:
         or ( config['Max_Nbr_Variants'] is not None
         and len(self.var) > config['Max_Nbr_Variants'] ) \
         or ( config['Min_Range'] is not None
-        and self.range() < config['Min_Range'] ) \
+        and self.computeRange() < config['Min_Range'] ) \
         or ( config['Max_Range'] is not None
-        and self.range() > config['Max_Range'] ):
+        and self.computeRange() > config['Max_Range'] ):
             return rank
 
         if config['positions'] is not None:
