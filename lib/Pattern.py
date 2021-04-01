@@ -284,23 +284,23 @@ class Pattern:
 
 
     def __str__(self):
-        string = ""
+        string = []
         for i in range(len(self.elems)):
-            if self.types[i] == "lem":
-                string += f"*{self.elems[i]}* "
+            if self.types[i] == "tk":
+                string.append(self.elems[i])
+            elif self.types[i] == "lem":
+                string.append(f"*{self.elems[i]}*")
+            elif self.types[i] == "tag":
+                string.append(self.elems[i])
+            elif self.types[i] == "sple":
+                string.append(f"*{self.elems[i]}*")
             elif self.types[i] == "*":
                 if i < self.node[0]:
-                    string = ""
+                    string = []
                 elif self.node[1] is not None and i >= self.node[1]:
-                    return string.strip()
-            elif self.types[i] == "tag":
-                string += f"{self.elems[i]} "
-            elif self.types[i] == "sple":
-                string += f"*{self.elems[i]}* "
-            else:
-                string += f"{self.elems[i]} "
+                    return " ".join(string)
 
-        return string.strip()
+        return " ".join(string)
 
 
     def longStr(self):
