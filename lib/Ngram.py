@@ -41,6 +41,14 @@ class Ngram:
         self.DP = 0
 
 
+    def computeRange(self):
+        disp_range = 0
+        for freq_cur in self.freq:
+            if freq_cur != 0:
+                disp_range += 1
+        return disp_range
+
+
     def computeDP(self, subcorpora_prop):
         #### no dispersion, only one subcorpus ####
         if len(subcorpora_prop) == 1:

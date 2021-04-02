@@ -121,8 +121,8 @@ tree-tagger and the wanted simplified tagset. \
 Format: {original_tag : simplified_tag}. \
 You MUST give a simplified tag set, for computational reasons.")
     main_parser.add_argument("--DB", "--data_base",
-        help="Folder in which the PEP/ folder can be created (to store data produced \
-by the pattern extraction).")
+        help="Folder in which the PEP/ folder can be created (to store data \
+produced by the pattern extraction).")
 
     ### arguments for display ###
     main_parser.add_argument("-o", "--output",
@@ -139,6 +139,9 @@ their examples when they are displayed"
     main_parser.add_argument("-E", "--Min-Freq-Examples",
         type=int,
         help="Minimum frequency of the examples of a pattern to be displayed")
+    main_parser.add_argument("-D", "--DP",
+        type=float,
+        help="Maximum dispersion value (DP) of a pattern to be displayed")
     main_parser.add_argument("-P", "--Proportion-Freq-Examples",
         type=float,
         help="Proportion of the parent frequency that a subpattern \
@@ -307,6 +310,8 @@ overwrite it? (y/n) ")
         info_list.append(f"- P (proportion of the frequency for subpatterns): {config['Proportion_Freq_Examples']}")
     if config['Min_Freq_Examples'] != 1:
         info_list.append(f"- E (minimum frequency of the supbatterns): {config['Min_Freq_Examples']}")
+    if config['DP'] != 1:
+        info_list.append(f"- DP (maximum value of DP (dispersion)): {config['DP']}")
     if config['Min_Range'] != 1:
         info_list.append(f"- R (minimum range): {config['Min_Range']}")
     if config['Max_Range'] is not None:

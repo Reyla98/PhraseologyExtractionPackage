@@ -16,7 +16,6 @@ class Pattern:
     def __init__(self, ngram_list, m, subcorpora_prop, deepness=0):
         #### set the attributes ####
         self.var = None     #list of Ngrams
-        self.nbr_var = None
         self.elems = None
         self.types = None
         self.freq = None    #list of int
@@ -30,7 +29,6 @@ class Pattern:
         if len(ngram_list) == 1:
             ngram_ref = ngram_list[0]
             self.var = []
-            self.nbr_var = 1
             self.elems = ngram_ref.tokens
             self.types = ["tk" for i in range(len(ngram_ref))]
             self.freq = ngram_ref.freq
@@ -92,35 +90,7 @@ class Pattern:
                         break
 
             var.append(ngram_cur)
-
-
-        ### removing extra slots ###
-        start = 0
-        for t in types:
-            if t is None:
-                start += 1
-                for v in var:
-                    v.removeSlotStart()
-            else:
-                break
-        types.reverse()
-        end = 0
-        for t in types:
-            if t is None:
-                end += 1
-                for v in var:
-                    v.removeSlotEnd()
-            else:
-                break
-        types.reverse()
-
-        if end != 0:
-            elems = list(islice(elems, start, len(types)-end))
-            types = types[start:-end]
-        else:
-            types = types[start:]
-            elems = list(islice(elems, start, None))
-
+            
 
         #### finding core (index of 1st & last common tokens) ####
         core = None
@@ -133,7 +103,7 @@ class Pattern:
             else:
                 count_common += 1
                 if count_common >= m:
-                    core = [i - count_common + 1, i + 1]
+                    core = (i - count_common + 1, i + 1)
 
 
         #### compute freq
@@ -153,7 +123,6 @@ class Pattern:
         self.elems = elems
         self.types = types
         self.var = var
-        self.nbr_var = len(var)
         self.core = core
         self.subPat = []
         self.DP = self.computeDP(subcorpora_prop)
@@ -167,6 +136,7 @@ class Pattern:
             after_core = self.core[1]
         except :
             print(self.elems)
+            print(self.types)
             for ngram in self.var:
                 print(ngram)
             print()
@@ -249,6 +219,9 @@ class Pattern:
 
 
     def __len__(self):
+        """
+        return the len of self.elem disregarding the initial and final "*"
+        """
         first_elem_index = 0
         last_elem_index = 0
         for i, e in enumerate(self.elems):
@@ -325,15 +298,8 @@ class Pattern:
 
 
     def printAllVar(self, config, rank, file):
-        if self.deepness == 0:
-            if self.totFreq() < config['Min_Freq_Patterns']:
-                return rank
-            if config['Max_Nbr_Variants'] is not None\
-            and self.nbr_var > config['Max_Nbr_Variants']:
-                return rank
-            if config['Min_Nbr_Variants'] is not None\
-            and self.nbr_var < config['Min_Nbr_Variants']:
-                return rank
+        if self.deepness == 0 and self.totFreq() < config['Min_Freq_Patterns']:
+            return rank
 
         # check all conditions for parent pattern NOT to be printed
         if ( config['Min_Nbr_Variants'] is not None
@@ -343,7 +309,8 @@ class Pattern:
         or ( config['Min_Range'] is not None
         and self.computeRange() < config['Min_Range'] ) \
         or ( config['Max_Range'] is not None
-        and self.computeRange() > config['Max_Range'] ):
+        and self.computeRange() > config['Max_Range'] ) \
+        or (self.DP > config['DP']):
             return rank
 
         if config['positions'] is not None:
@@ -376,7 +343,14 @@ class Pattern:
             if var_cur.totFreq() >= config['Min_Freq_Examples']:
                 if var_cur.totFreq() >= config['Proportion_Freq_Examples'] * self.totFreq():
                     if isinstance(var_cur, Ngram):
-                        file.write("\t" * (self.deepness+1) + var_cur.longStr())
+                        if ( config['Min_Range'] is not None
+                        and var_cur.computeRange() < config['Min_Range'] ) \
+                        or ( config['Max_Range'] is not None
+                        and var_cur.computeRange() > config['Max_Range'] ) \
+                        or (var_cur.DP > config['DP']):
+                            continue
+                        else:
+                            file.write("\t" * (self.deepness+1) + var_cur.longStr())
                     else:
                         var_cur.printAllVar(config, rank, file)
 
