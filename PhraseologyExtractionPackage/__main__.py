@@ -297,6 +297,10 @@ overwrite it? (y/n) ")
         raise ValueError(f"{config['sple_tagset']} is not a valid json format.")
 
 
+    ### add "*" to stop-words ###
+
+    config['sw_mid_tk'].append("*")
+
     #### Print arguments and ask for confirmation to continue ####
 
     info_list = ["The following arguments are going to be used:",
