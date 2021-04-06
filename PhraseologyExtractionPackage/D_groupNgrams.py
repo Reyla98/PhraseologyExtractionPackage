@@ -62,7 +62,7 @@ class groupNgrams(luigi.Task):
             )) for corpus_name in self.config['corpora_names']]
 
 
-        #compute the proportional size of each subcorpur
+        #compute the proportional size of each subcorpus
         #  (the 1st line of each file is the number of words in the sub-corpus)
         subcorpora_size = []
         for file in input_files:
@@ -85,11 +85,12 @@ class groupNgrams(luigi.Task):
             with open(file, "rb") as fin:
                 next(loadNgrams(fin)) #we skip the 1st line (subcorpus size)
                 for ngram in loadNgrams(fin):
+                    fullStr = ngram.fullStr()
                     freq_cur = ngram.freq[0]
-                    if ngram not in ngram_disp:
+                    if fullStr not in ngram_disp:
                         ngram.freq = [0 for i in range(file_cur)]
-                        ngram_disp[ngram] = ngram
-                    ngram_disp[ngram].freq.append(freq_cur)
+                        ngram_disp[fullStr] = ngram
+                    ngram_disp[fullStr].freq.append(freq_cur)
 
             #if some ngrams were not present in the current file,
             #  we add them "0" frequency
