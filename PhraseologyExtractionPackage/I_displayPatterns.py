@@ -29,7 +29,8 @@ def compute_sum_stats(stats):
     for i in range(len(stats)):
         for length in range(len(stats[0])):
             stats[i][length][0] = sum(stats[i][length][1:])
-        stats[i][0][0] = sum([j[0] for j in stats[i]])
+            for deepness in range(len(stats[0][0])):
+                stats[i][0][deepness] += stats[i][length][deepness]
     return stats
 
 

@@ -329,13 +329,12 @@ class Pattern:
             rank += 1
             file.write(str(rank) + "  " + self.longStr())
 
-        # freq of self added to stats
-        if len(self.subPat) == 0 and len(self.var) <= 1:
-            stats[0][len(self)][self.deepness+1] += 1
-            stats[1][len(self)][self.deepness+1] += self.totFreq()
-        else:
-            stats[2][len(self)][self.deepness+1] += 1
-            stats[3][len(self)][self.deepness+1] += self.totFreq()
+        # freq of self is added to stats
+        stats[0][len(self)][self.deepness+1] += 1
+        stats[1][len(self)][self.deepness+1] += self.totFreq()
+        if self.deepness >= 1:
+            stats[2][len(self)][self.deepness] += 1
+            stats[3][len(self)][self.deepness] += self.totFreq()
 
         # we also print all its children according to the user parameters
         all_vars = self.var + self.subPat
@@ -360,6 +359,8 @@ class Pattern:
                             file.write("\t" * (self.deepness+1) + var_cur.longStr())
                             stats[0][var_cur.nbr_tokens()][self.deepness+2] += 1
                             stats[1][var_cur.nbr_tokens()][self.deepness+2] += var_cur.totFreq()
+                            stats[2][len(self)][self.deepness+1] += 1
+                            stats[3][len(self)][self.deepness+1] += var_cur.totFreq()
                     else:
                         var_cur.printAllVar(config, rank, stats, file)
 
