@@ -136,6 +136,14 @@ class Ngram:
         return full_str
 
 
+    def nbr_tokens(self):
+        nbr_tokens = 0
+        for token in self.tokens:
+            if token != "*":
+                nbr_tokens += 1
+        return nbr_tokens
+
+
     def __len__(self):
         return len(self.tokens)
 

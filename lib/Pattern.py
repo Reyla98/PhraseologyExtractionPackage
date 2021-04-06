@@ -90,7 +90,7 @@ class Pattern:
                         break
 
             var.append(ngram_cur)
-            
+
 
         #### finding core (index of 1st & last common tokens) ####
         core = None
@@ -297,9 +297,9 @@ class Pattern:
         return disp_range
 
 
-    def printAllVar(self, config, rank, file):
+    def printAllVar(self, config, rank, stats, file):
         if self.deepness == 0 and self.totFreq() < config['Min_Freq_Patterns']:
-            return rank
+            return rank, stats
 
         # check all conditions for parent pattern NOT to be printed
         if ( config['Min_Nbr_Variants'] is not None
@@ -309,18 +309,17 @@ class Pattern:
         or ( config['Min_Range'] is not None
         and self.computeRange() < config['Min_Range'] ) \
         or ( config['Max_Range'] is not None
-        and self.computeRange() > config['Max_Range'] ) \
-        or (self.DP > config['DP']):
-            return rank
+        and self.computeRange() > config['Max_Range'] ):
+            return rank, stats
 
         if config['positions'] is not None:
             for i in range(len(self.freq)):
                 if i+1 in config['positions']:  #i+1 because index specified by user starts at 1 and not 0
                     if self.freq[i] == 0:
-                        return rank
+                        return rank, stats
                 else:
                     if self.freq[i] != 0 :
-                        return rank
+                        return rank, stats
 
 
         # all conditions are fullfilled, parent pattern is printed
@@ -329,6 +328,14 @@ class Pattern:
         else:
             rank += 1
             file.write(str(rank) + "  " + self.longStr())
+
+        # freq of self added to stats
+        if len(self.subPat) == 0 and len(self.var) <= 1:
+            stats[0][len(self)][self.deepness+1] += 1
+            stats[1][len(self)][self.deepness+1] += self.totFreq()
+        else:
+            stats[2][len(self)][self.deepness+1] += 1
+            stats[3][len(self)][self.deepness+1] += self.totFreq()
 
         # we also print all its children according to the user parameters
         all_vars = self.var + self.subPat
@@ -351,11 +358,13 @@ class Pattern:
                             continue
                         else:
                             file.write("\t" * (self.deepness+1) + var_cur.longStr())
+                            stats[0][var_cur.nbr_tokens()][self.deepness+2] += 1
+                            stats[1][var_cur.nbr_tokens()][self.deepness+2] += var_cur.totFreq()
                     else:
-                        var_cur.printAllVar(config, rank, file)
+                        var_cur.printAllVar(config, rank, stats, file)
 
         file.write("\n")
-        return rank
+        return rank, stats
 
 
     def __hash__(self):

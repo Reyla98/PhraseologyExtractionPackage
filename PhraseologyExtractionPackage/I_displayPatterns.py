@@ -15,6 +15,24 @@ from . import H_buildPatterns as buildPatterns
 
 from pprint import pprint
 
+def init_stats(config):
+    stats = []
+    for i in range(6):
+        stats.append([])
+        for j in range(config['n']*2):
+            stats[i].append([])
+            for k in range(config['n']*2):
+                stats[i][j].append(0)
+    return stats
+
+def compute_sum_stats(stats):
+    for i in range(len(stats)):
+        for length in range(len(stats[0])):
+            stats[i][length][0] = sum(stats[i][length][1:])
+        stats[i][0][0] = sum([j[0] for j in stats[i]])
+    return stats
+
+
 class displayPatterns(luigi.Task):
     """
     Display patterns on the terminal or prints them into a file, in atree-
@@ -93,15 +111,19 @@ class displayPatterns(luigi.Task):
         else:
             fout = open(self.config['output'], "w")
 
+        stats = init_stats(self.config)
+
         for file in all_files:
             with open(str(pathlib.Path(input_folder)) +
                       str(pathlib.Path(f"/{file}")), "rb") as fin:
                 pattern = pickle.load(fin)
-                rank = pattern.printAllVar(self.config, rank, fout)
+                rank, stats = pattern.printAllVar(self.config, rank, stats, fout)
+
+        stats = compute_sum_stats(stats)
+        pprint(stats, stream=fout)
 
         if "output" not in self.config:
             fout.close()
-
 
 
 def main(config):
