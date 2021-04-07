@@ -57,9 +57,8 @@ class removeEmbeddedNGrams(luigi.Task):
             """
             ngram_list is a list containing ngrams of size n and
             n + 1, sorted in alphabetical order
-            return a list of ngrams of size n if they are not embedded
-            in ngram of size n+1 (compare only the beginning of the
-            ngrams)
+            return a list of ngrams of size n that are not embedded
+            in ngrams of size n+1
             """
             if ngram_list == []:
                 return []
@@ -75,75 +74,19 @@ class removeEmbeddedNGrams(luigi.Task):
             return ngram_filtered
 
 
-        def compareNgramLists(l1, l2, n):
-            def sort_on_end(ngram):
+        def compareNgrams(small_ngram_list, long_ngram_list, n):
+            def sortFromEnd(ngram):
                 return ngram.string[::-1]
-            ngram_list = sorted(itertools.chain(l1, l2),
-                                key=sort_on_end)
+
+            # filter from start
+            ngram_list = sorted(itertools.chain(small_ngram_list, long_ngram_list))
             small_ngram_list_filtered = removeEmbNgrams(ngram_list, n)
-            return small_ngram_list_filtered
-
-
-        def compareNgrams(small_ngram_list, f2, n):
-            """
-            small_ngram_list is either a list or a generator
-            f2 is a file
-            """
-
-            # filter from the start
-            long_ngram_list = []
-            small_ngram_list_filtered = []
-
-            try:
-                long_ngram = next(loadNgrams(f2))
-                long_ngram_list.append(long_ngram)
-            except StopIteration:
-                if isinstance(small_ngram_list, list):
-                    small_ngram_list_filtered = compareNgramLists(
-                        small_ngram_list_filtered,
-                        long_ngram_list, n)
-                    return small_ngram_list, long_ngram_list
-                else:
-                    small_ngram_list_filtered = [ngram for ngram in small_ngram_list]
-                    if small_ngram_list_filtered is None:
-                        small_ngram_list_filtered = []
-                    small_ngram_list_filtered = compareNgramLists(
-                        small_ngram_list_filtered,
-                        long_ngram_list, n)
-                    return (small_ngram_list_filtered,
-                    long_ngram_list)
-
-            for i, small_ngram in enumerate(small_ngram_list):
-                while long_ngram < small_ngram:
-                    long_ngram_list.append(long_ngram)
-                    try:
-                        long_ngram = next(loadNgrams(f2))
-                    except StopIteration:
-                        if not isinstance(small_ngram_list, list):
-                            for small_ngram in small_ngram_list:
-                                small_ngram_list_filtered.append(small_ngram)
-                        else:
-                            small_ngram_list_filtered.extend(
-                                small_ngram_list[i-1:])
-                        small_ngram_list_filtered = compareNgramLists(
-                            small_ngram_list_filtered,
-                            long_ngram_list, n)
-                        return small_ngram_list_filtered, long_ngram_list
-
-                if (small_ngram.freq != long_ngram.freq
-                or small_ngram.string not in long_ngram.string):
-                    small_ngram_list_filtered.append(small_ngram)
-
-            for long_ngram in loadNgrams(f2):
-                long_ngram_list.append(long_ngram)
-
 
             # filter from the end
-            small_ngram_list_filtered = compareNgramLists(
-                small_ngram_list_filtered,
-                long_ngram_list, n)
+            ngram_list = sorted(itertools.chain(small_ngram_list_filtered, long_ngram_list), key=sortFromEnd)
+            small_ngram_list_filtered = removeEmbNgrams(ngram_list, n)
 
-            return small_ngram_list_filtered, long_ngram_list
+            return small_ngram_list_filtered
 
 
         def main():
@@ -179,23 +122,17 @@ class removeEmbeddedNGrams(luigi.Task):
                 input_file2 = str(input_folder) + f"/{i+1}"
 
                 if small_ngram_list == []:
-                    small_ngram_file = open(input_file1, "rb")
-                    small_ngram_list = loadNgrams(small_ngram_file)
+                    with open(input_file1, "rb") as small_ngram_file:
+                        small_ngram_list = [ngram for ngram in loadNgrams(small_ngram_file)]
                 else:
                     small_ngram_list = long_ngram_list
 
-                long_ngram_file = open(input_file2, "rb")
+                with open(input_file2, "rb") as long_ngram_file:
+                    long_ngram_list = [ngram for ngram in loadNgrams(long_ngram_file)]
 
-                small_ngram_list_filtered, long_ngram_list = compareNgrams(small_ngram_list,
-                                                              long_ngram_file,
-                                                              i)
-
-                try:
-                    small_ngram_file.close()
-                except :
-                    pass
-                long_ngram_file.close()
-
+                small_ngram_list_filtered = compareNgrams(small_ngram_list,
+                                                          long_ngram_list,
+                                                          i)
 
                 with open(str(output_folder) +
                           str(pathlib.Path(f"/{i}")), "wb")\
