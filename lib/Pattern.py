@@ -132,15 +132,7 @@ class Pattern:
         # group variants per tag if odd deepness
         # group variants per lemma if even deepness
 
-        try:
-            after_core = self.core[1]
-        except :
-            print(self.elems)
-            print(self.types)
-            for ngram in self.var:
-                print(ngram)
-            print()
-            return
+        after_core = self.core[1]
 
         if deepness%2 == 0:
             elem = "lemmas"
@@ -175,6 +167,7 @@ class Pattern:
         except IndexError: #nothing after core
             pass
 
+
         #### group variants based on what precedes the core ####
         before_core = self.core[0] -1
         if before_core < 0: #nothing before core
@@ -204,11 +197,18 @@ class Pattern:
                                            deepness=deepness+1))
         self.var.extend(other)
 
-        #if only one pattern as variant, it is discarded and
-        #its children are brought one level up
-        if len(self.var) == 0 and len(self.subPat) == 1:
-            self.var = self.subPat[0].var
-            self.subPat = self.subPat[0].subPat
+        #if only one pattern as variant, the current one is discarded
+        while len(self.subPat) == 1 and self.freq == self.subPat[0].freq:
+            self.var = self.subPat[0].var     #list of Ngrams
+            self.elems = self.subPat[0].elems
+            self.types = self.subPat[0].types
+            self.freq = self.subPat[0].freq    #list of int
+            self.core = self.subPat[0].core    #index of 1st & last common tokens
+            self.DP = self.subPat[0].DP
+            self.subPat = self.subPat[0].subPat  #list of Patterns
+
+        #while len(self.subPat) == 0 and len(self.var) == 1:
+        #    self.
 
 
     def __eq__(self, other):
