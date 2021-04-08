@@ -17,21 +17,29 @@ from pprint import pprint
 
 def init_stats(config):
     stats = []
-    for i in range(6):
+    for i in range(len(config['corpora_names'])+1):
         stats.append([])
-        for j in range(config['n']*2):
+        for j in range(4):
             stats[i].append([])
             for k in range(config['n']*2):
-                stats[i][j].append(0)
+                stats[i][j].append([])
+                for l in range(config['n']*2):
+                    stats[i][j][k].append(0)
     return stats
 
 def compute_sum_stats(stats):
-    for i in range(len(stats)):
-        for length in range(len(stats[0])):
-            stats[i][length][0] = sum(stats[i][length][1:])
-            for deepness in range(len(stats[0][0])):
-                stats[i][0][deepness] += stats[i][length][deepness]
+    for corpus in range(len(stats)):
+        for i in range(len(stats[0])):
+            for length in range(len(stats[0][0])):
+                stats[corpus][i][length][0] = sum(stats[corpus][i][length][1:])
+                for deepness in range(len(stats[0][0][0])):
+                    stats[corpus][i][0][deepness] += stats[corpus][i][length][deepness]
     return stats
+
+    stats[0][i][0][deepness]
+
+
+
 
 
 class displayPatterns(luigi.Task):

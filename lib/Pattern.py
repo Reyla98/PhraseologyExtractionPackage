@@ -297,7 +297,7 @@ class Pattern:
         return disp_range
 
 
-    def printAllVar(self, config, rank, stats, file):
+    def printAllVar(self, config, rank, stats, file, len_parent=None):
         if self.deepness == 0 and self.totFreq() < config['Min_Freq_Patterns']:
             return rank, stats
 
@@ -330,11 +330,19 @@ class Pattern:
             file.write(str(rank) + "  " + self.longStr())
 
         # freq of self is added to stats
-        stats[0][len(self)][self.deepness+1] += 1
-        stats[1][len(self)][self.deepness+1] += self.totFreq()
-        if self.deepness >= 1:
-            stats[2][len(self)][self.deepness] += 1
-            stats[3][len(self)][self.deepness] += self.totFreq()
+        stats[0][0][len(self)][self.deepness+1] += 1
+        stats[0][1][len(self)][self.deepness+1] += self.totFreq()
+        for corpus in range(len(self.freq)):
+            if self.freq[corpus] != 0:
+                stats[corpus+1][0][len(self)][self.deepness+1] += 1
+                stats[corpus+1][1][len(self)][self.deepness+1] += self.freq[corpus]
+        if self.deepness >= 1 :
+            stats[0][2][len_parent][self.deepness] += 1
+            stats[0][3][len_parent][self.deepness] += self.totFreq()
+            for corpus in range(len(self.freq)):
+                if self.freq[corpus] != 0:
+                    stats[corpus+1][2][len_parent][self.deepness] += 1
+                    stats[corpus+1][3][len_parent][self.deepness] += self.freq[corpus]
 
         # we also print all its children according to the user parameters
         all_vars = self.var + self.subPat
@@ -357,12 +365,18 @@ class Pattern:
                             continue
                         else:
                             file.write("\t" * (self.deepness+1) + var_cur.longStr())
-                            stats[0][var_cur.nbr_tokens()][self.deepness+2] += 1
-                            stats[1][var_cur.nbr_tokens()][self.deepness+2] += var_cur.totFreq()
-                            stats[2][len(self)][self.deepness+1] += 1
-                            stats[3][len(self)][self.deepness+1] += var_cur.totFreq()
+                            stats[0][0][var_cur.nbr_tokens()][self.deepness+2] += 1
+                            stats[0][1][var_cur.nbr_tokens()][self.deepness+2] += var_cur.totFreq()
+                            stats[0][2][len(self)][self.deepness+1] += 1
+                            stats[0][3][len(self)][self.deepness+1] += var_cur.totFreq()
+                            for corpus in range(len(self.freq)):
+                                if var_cur.freq[corpus] != 0:
+                                    stats[corpus+1][0][var_cur.nbr_tokens()][self.deepness+2] += 1
+                                    stats[corpus+1][1][var_cur.nbr_tokens()][self.deepness+2] += var_cur.freq[corpus]
+                                    stats[corpus+1][2][len(self)][self.deepness+1] += 1
+                                    stats[corpus+1][3][len(self)][self.deepness+1] += var_cur.freq[corpus]
                     else:
-                        var_cur.printAllVar(config, rank, stats, file)
+                        var_cur.printAllVar(config, rank, stats, file, len(self))
 
         file.write("\n")
         return rank, stats
