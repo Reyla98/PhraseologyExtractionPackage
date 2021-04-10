@@ -134,7 +134,7 @@ class Pattern:
 
         after_core = self.core[1]
 
-        if deepness%2 == 0:
+        if deepness%2 != 0:
             elem = "lemmas"
         else:
             elem = "sple_tags"
