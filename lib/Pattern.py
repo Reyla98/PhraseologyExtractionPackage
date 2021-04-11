@@ -277,7 +277,7 @@ class Pattern:
 
 
     def longStr(self):
-        return "{}\t{}\t{}\t{}\n".format(
+        return "{}\t{}\t{:0.3f}\t{}\n".format(
             str(self),
             self.totFreq(),
             self.DP,
