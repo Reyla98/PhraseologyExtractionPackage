@@ -116,7 +116,7 @@ class Ngram:
 
 
     def longStr(self):
-        return "{}\t{}\t{}\t{}\n".format(
+        return "{}\t{}\t{:0.3f}\t{}\n".format(
             " ".join(self.tokens).strip(" *"),
             self.totFreq(),
             self.DP,
