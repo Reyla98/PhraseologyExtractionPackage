@@ -299,7 +299,10 @@ overwrite it? (y/n) ")
 
     ### add "*" to stop-words ###
 
-    config['sw_mid_tk'].append("*")
+    if config['regex']:
+        config['sw_mid_tk'].append("\*")
+    else:
+        config['sw_mid_tk'].append("*")
 
     #### Print arguments and ask for confirmation to continue ####
 
