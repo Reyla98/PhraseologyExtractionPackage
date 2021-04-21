@@ -309,7 +309,8 @@ class Pattern:
         or ( config['Min_Range'] is not None
         and self.computeRange() < config['Min_Range'] ) \
         or ( config['Max_Range'] is not None
-        and self.computeRange() > config['Max_Range'] ):
+        and self.computeRange() > config['Max_Range'] ) \
+        or (self.DP > config['DP']):
             return rank, stats
 
         if config['positions'] is not None:
