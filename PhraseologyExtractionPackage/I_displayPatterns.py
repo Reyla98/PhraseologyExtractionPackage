@@ -36,11 +36,6 @@ def compute_sum_stats(stats):
                     stats[corpus][i][0][deepness] += stats[corpus][i][length][deepness]
     return stats
 
-    stats[0][i][0][deepness]
-
-
-
-
 
 class displayPatterns(luigi.Task):
     """
@@ -127,9 +122,22 @@ class displayPatterns(luigi.Task):
                       str(pathlib.Path(f"/{file}")), "rb") as fin:
                 pattern = pickle.load(fin)
                 rank, stats = pattern.printAllVar(self.config, rank, stats, fout)
-
         stats = compute_sum_stats(stats)
-        pprint(stats, stream=fout)
+        fout.write("All corpora:\n")
+        for j, k in enumerate(["Types",
+                               "Tokens",
+                               "Number of variants (types)",
+                               "Number of variants (tokens)"]):
+            fout.write(k + ":\n")
+            pprint(stats[0][j], stream=fout)
+        for i, corpus_name in enumerate(self.config['corpora_names']):
+            fout.write(corpus_name + ":\n")
+            for j, k in enumerate(["Types",
+                                   "Tokens",
+                                   "Number of variants (types)",
+                                   "Number of variants (tokens)"]):
+                fout.write(k + ":\n")
+                pprint(stats[i+1][j], stream=fout)
 
         if "output" not in self.config:
             fout.close()
