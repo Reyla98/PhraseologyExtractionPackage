@@ -118,10 +118,19 @@ class displayPatterns(luigi.Task):
         stats = init_stats(self.config)
 
         for file in all_files:
+            if self.config['csv_file'] is not None:
+                csv_line = []
+            else:
+                csv_line = None
             with open(str(pathlib.Path(input_folder)) +
                       str(pathlib.Path(f"/{file}")), "rb") as fin:
                 pattern = pickle.load(fin)
-                rank, stats = pattern.printAllVar(self.config, rank, stats, fout)
+                rank, stats, csv_line = pattern.printAllVar(self.config, rank, stats, fout, csv_line=csv_line)
+            if csv_line is not None and len(csv_line) > 0 :
+                with open(self.config['csv_file'], "a") as csv_fout:
+                    csv_fout.write(self.config['csv_separator'].join([str(val) for val in csv_line]) + "\n")
+
+
         stats = compute_sum_stats(stats)
         fout.write("All corpora:\n")
         for j, k in enumerate(["Types",

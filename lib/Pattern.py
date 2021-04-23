@@ -297,9 +297,9 @@ class Pattern:
         return disp_range
 
 
-    def printAllVar(self, config, rank, stats, file, len_parent=None):
+    def printAllVar(self, config, rank, stats, file, len_parent=None, csv_line=None):
         if self.deepness == 0 and self.totFreq() < config['Min_Freq_Patterns']:
-            return rank, stats
+            return rank, stats, csv_line
 
         # check all conditions for parent pattern NOT to be printed
         if ( config['Min_Nbr_Variants'] is not None
@@ -311,16 +311,16 @@ class Pattern:
         or ( config['Max_Range'] is not None
         and self.computeRange() > config['Max_Range'] ) \
         or (self.DP > config['DP']):
-            return rank, stats
+            return rank, stats, csv_line
 
         if config['positions'] is not None:
             for i in range(len(self.freq)):
                 if i+1 in config['positions']:  #i+1 because index specified by user starts at 1 and not 0
                     if self.freq[i] == 0:
-                        return rank, stats
+                        return rank, stats, csv_line
                 else:
                     if self.freq[i] != 0 :
-                        return rank, stats
+                        return rank, stats, csv_line
 
 
         # all conditions are fullfilled, parent pattern is printed
@@ -329,6 +329,13 @@ class Pattern:
         else:
             rank += 1
             file.write(str(rank) + "  " + self.longStr())
+            if csv_line is not None:
+                csv_line.extend([str(self),
+                                 self.totFreq(),
+                                 self.DP,
+                                 0,  #nbr of sub-patterns ; is updated when a sub-pattern is printed
+                                 ])
+                csv_line.extend(self.freq)
 
         # freq of self is added to stats
         stats[0][0][len(self)][self.deepness+1] += 1
@@ -338,6 +345,8 @@ class Pattern:
                 stats[corpus+1][0][len(self)][self.deepness+1] += 1
                 stats[corpus+1][1][len(self)][self.deepness+1] += self.freq[corpus]
         if self.deepness >= 1 :
+            if self.deepness == 1 and csv_line is not None:
+                csv_line[3] += 1
             stats[0][2][len_parent][self.deepness] += 1
             stats[0][3][len_parent][self.deepness] += self.totFreq()
             for corpus in range(len(self.freq)):
@@ -376,11 +385,13 @@ class Pattern:
                                     stats[corpus+1][1][var_cur.nbr_tokens()][self.deepness+2] += var_cur.freq[corpus]
                                     stats[corpus+1][2][len(self)][self.deepness+1] += 1
                                     stats[corpus+1][3][len(self)][self.deepness+1] += var_cur.freq[corpus]
+                            if self.deepness == 1 and csv_line is not None:
+                                csv_line[3] += 1
                     else:
-                        var_cur.printAllVar(config, rank, stats, file, len(self))
+                        var_cur.printAllVar(config, rank, stats, file, len(self), csv_line=csv_line)
 
         file.write("\n")
-        return rank, stats
+        return rank, stats, csv_line
 
 
     def __hash__(self):

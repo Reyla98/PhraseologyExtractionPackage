@@ -171,12 +171,18 @@ to be displayed (all other subcorpora must not contain it)")
         action='store_true')
 
 
-    ### global scheduler (does not work on Windows)
+    ### other ###
     main_parser.add_argument("-g", "--global-scheduler",
         help="Use a deamon server instead of a local scheduler. \
 This option does not work on Windows. To run the server, use the \
 command luigid.",
         action='store_true')
+
+    main_parser.add_argument("--csv",
+        help="Path to the csv file (if one wanted) followed by the desired \
+csv separator",
+        nargs=2)
+
 
     args =  main_parser.parse_args()
     args = {k: v for k, v in vars(args).items() if v is not None}
@@ -213,6 +219,11 @@ command luigid.",
 
     if sys.platform == "win32" or sys.platform == "cygwin":
         args['local_scheduler'] = True
+
+    if 'csv' in args:
+        args['csv_separator'] = args['csv'][1]
+        args['csv_file'] = args['csv'][0]
+        args.pop('csv')
 
 
     #### parse default values ####
