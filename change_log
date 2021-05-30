@@ -1,14 +1,19 @@
-#
+# v 0.2.0
+
+- A summary of the number of patterns (types + tokens) and of variants (types + tokens) is printed at the end of the pattern output.
 - -tree-tagger option was replaced by the option --language. Only the language used by tree-tagger must be specified, the tree-tagger command is not necessary anymore.
 - Add the possibility to specify the -P parameter, a float which represents the proportion of the parent frequency that a subpattern must have to be printed (e.g. if -P 0.2 is specified, and the parent pattern has frequency 50, only subpatterns with frequency 10 or higher will be printed)
 - Add the possibility to specify the -p parameter, which must be followed by the indexes of the subcorpora that should contain the patterns for them to be printed (all other subcorpora must NOT contain it)
+- Add the possibility to set the --csv argument that takes two parameters: the name of the csv output file, followed by the character to use as column separator. The csv output contains each main pattern along with its global frequency, its frequency in each sub-corpus and its number of sub-patterns.
 - Ask confirmation that the parameters are correct before proceeding to extraction
 - Remove wildcards (except for "/") in filenames on Unix systems
 
 Bug fixes:
     - Frequency display
     - Simplified_tags display
+    - the symbol * is always added to the stop-words (mid-token) to avoid conflicts
     - Other minor fixes
 
 # v 0.1.1
+
 bug fix
