@@ -138,7 +138,9 @@ class displayPatterns(luigi.Task):
                                "Number of variants (types)",
                                "Number of variants (tokens)"]):
             fout.write(k + ":\n")
-            pprint(stats[0][j], stream=fout)
+            stats_summary = [str(deepness[1]) for deepness in stats[0][j]]
+            fout.write(", ".join(stats_summary) + "\n\n")
+            
         for i, corpus_name in enumerate(self.config['corpora_names']):
             fout.write(corpus_name + ":\n")
             for j, k in enumerate(["Types",
@@ -146,7 +148,8 @@ class displayPatterns(luigi.Task):
                                    "Number of variants (types)",
                                    "Number of variants (tokens)"]):
                 fout.write(k + ":\n")
-                pprint(stats[i+1][j], stream=fout)
+                stats_summary = [str(deepness[1]) for deepness in stats[i+1][j]]
+                fout.write(", ".join(stats_summary) + "\n\n")
 
         if "output" not in self.config:
             fout.close()
