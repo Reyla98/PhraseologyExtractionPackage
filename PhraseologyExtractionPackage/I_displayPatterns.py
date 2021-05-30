@@ -118,7 +118,7 @@ class displayPatterns(luigi.Task):
         stats = init_stats(self.config)
 
         for file in all_files:
-            if self.config['csv_file'] is not None:
+            if 'csv_file' in self.config:
                 csv_line = []
             else:
                 csv_line = None
@@ -140,7 +140,7 @@ class displayPatterns(luigi.Task):
             fout.write(k + ":\n")
             stats_summary = [str(deepness[1]) for deepness in stats[0][j]]
             fout.write(", ".join(stats_summary) + "\n\n")
-            
+
         for i, corpus_name in enumerate(self.config['corpora_names']):
             fout.write(corpus_name + ":\n")
             for j, k in enumerate(["Types",
